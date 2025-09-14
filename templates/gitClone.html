@@ -276,7 +276,7 @@
                         <span style="font-size: 28px;">×</span>
                     </button>
                     <button class="log-action-btn" id="toggle-log" title="Toggle output visibility">
-                        <span class="material-icons" id="toggle-icon">^</span>
+                        <span class="material-icons" id="toggle-icon">expand_more</span>
                     </button>
                 </div>
             </div>
@@ -298,7 +298,7 @@
         toggleLogBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             logContent.classList.toggle('visible');
-            toggleIcon.textContent = logContent.classList.contains('visible') ? 'expand_less' : '^';
+            toggleIcon.textContent = logContent.classList.contains('visible') ? 'expand_less' : 'expand_more';
         });
         
         // Clear log
