@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Project - AndroidIDE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body {
+            user-select: none;
+            background-color: white;
+            color: #333;
+            min-height: 100vh;
+            padding: 0px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        #back-btn {
+          position: absolute;
+          background: white;
+          display: flex;
+          align-items: center;
+          width: 100px;
+          height: 40px;
+          padding: 8px;
+          font-size: 16px;
+          bottom: 0;
+          left: 0;
+          gap: 20px;
+          border-radius: 50px;
+          border: 1px solid gray;
+          margin: 20px;
+        }
+        #back-btn:active{
+          background-color: #f5f5f5;
+        }
+        #back-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #333;
+        }
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 500;
+            margin: auto;
+            margin-top: 20px;
+        }
+        form {
+            display: ;
+            background: white;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        fieldset{
+            border-radius: 5px;
+            border: 2px solid lightgray;
+        }
+        fieldset:focus-within{
+            border-color:  #4285f4;
+        }
+        legend{
+            font-size: 13px;
+            margin-left: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px 14px 14px 14px;
+            font-size: 16px;
+            border: none;
+            outline: none;
+            background: none;
+            display: flex;
+            align-items: center;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4285f4;
+            background-color: #fff;
+        }
+        .btn {
+            background-color: #4285f4;
+            color: white;
+            position: absolute;
+            border: none;
+            padding: 10px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            width: 140px;
+            height: 40px;
+            right: 0;
+            bottom: 0;
+            margin: 20px;
+        }
+        .btn:active {
+            background-color: #3367d6;
+        }
+        #logContainer {
+            display: none;
+            background: #FFFFFF;
+            border-radius: 14px;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            margin-top: 0px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+        #log {
+            height: 92vh;
+            background-color: #E8E8E8;
+            color: black;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre;
+            overflow-y: auto;
+            overflow-x: auto;
+
+        }
+        .log-header{
+            height: 60px;
+            background: white;
+            margin-top: -20px;
+        }
+        .log-header h2{
+            padding-top: 10px;
+            margin: 20px;
+        }
+        .close-log {
+            background: ghostwhite;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            float: right;
+            margin-top: -50px;
+            margin-right: 20px;
+            height: 40px;
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 50px;
+            border: 1px solid grey;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button id="back-btn" onclick="history.back()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>Exit
+        </button>
+        <h1>Create New Project</h1>
+        
+    </div>
+     <span style="display: flex; align-items: center; margin-left: 20px;font-size: 16px; font-style: bold;">
+<svg width="40px" heigh="40px" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M41.226 76.778a4.002 4.002 0 0 1-.47-1.29c.09.452.25.887.47 1.29zm.578.713c.222.22.472.411.749.548l18.88 10.565-18.88-10.565a2.899 2.899 0 0 1-.747-.548z" fill="#083042"/><path d="M64.342 101.967h-.14a8.301 8.301 0 0 1-4.014-1.016l-28.182-15.75c-1.663-.932-2.686-2.66-2.686-4.527V48.628c0-1.373.249-2.69.83-3.842L8.114 32.522c-.913 1.92-1.383 4.088-1.356 6.366v52.927a8.675 8.675 0 0 0 4.458 7.49l46.481 26.012c2.05 1.152 4.347 1.701 6.617 1.701v-.027c.055-3.32.028-16.628.028-25.023z" fill="#083042"/><path d="m86.46 50.6-.167-.246c-.138-.192-.275-.357-.413-.548.138.164.275.356.413.547a.973.973 0 0 1 .167.247zM63.262 37.76c.14 0 .251-.027.39-.027-.139.027-.278.027-.39.027z" fill="#3ddb85"/><path d="M30.122 44.757a7.214 7.214 0 0 1 2.825-3.072l26.52-15.503a8.065 8.065 0 0 1 8.03-.082l26.798 15.009a8.993 8.993 0 0 1 3.018 2.743L118.99 31.04a14.913 14.913 0 0 0-4.955-4.5L69.766 1.764a13.32 13.32 0 0 0-13.233.137L12.765 27.472a11.704 11.704 0 0 0-4.651 5.049l22.009 12.236z" fill="#3ddc84"/><path d="M62.157 37.983c.057-.028.114-.028.17-.056-.056.028-.113.028-.17.056zm-20.88 12.949c.056-.11.111-.22.168-.3-.057.109-.111.19-.168.3l-.082.246z" fill="#3ddb85"/><path d="M118.962 31.04 97.285 43.852c.83 1.207 1.329 2.633 1.355 4.089v30.51a7.881 7.881 0 0 1-3.93 6.914L68.188 100.87a8.07 8.07 0 0 1-3.849 1.097c.029 8.369.029 21.677-.027 24.997v.027a13.533 13.533 0 0 0 6.617-1.812l43.769-25.599c4.07-2.387 6.562-6.723 6.506-11.415V37.817c-.028-2.442-.858-4.774-2.242-6.777z" fill="#4285f4"/><path d="M86.963 75.187c-.028.056-.028.111-.056.168a.387.387 0 0 0 .056-.168zm-.278-24.227c-.057-.138-.14-.248-.223-.385.083.137.166.275.222.385zM66.807 88.576 84.58 78.178c.111-.054.195-.138.306-.192-.111.054-.195.138-.306.192l-17.773 10.4zM86.74 75.818c-.056.138-.139.275-.196.413.057-.165.112-.303.196-.413z" fill="#4285f4"/><path d="M41.198 51.178a5.508 5.508 0 0 0-.415 1.675c-.028.218-.028.438-.028.686v21.483c0 .164 0 .302.028.467.056.465.222.905.47 1.29.167.274.36.492.555.712.222.22.47.411.746.55l18.882 10.563a5.49 5.49 0 0 0 2.684.685h.195a5.155 5.155 0 0 0 2.492-.74L84.58 78.15c.111-.055.194-.138.305-.192.194-.137.388-.275.554-.44.26-.236.501-.492.719-.768.138-.192.277-.383.388-.576.082-.136.139-.274.193-.412.056-.135.14-.301.195-.465.027-.056.027-.111.055-.165a5.403 5.403 0 0 0 .249-1.647V53.044c0-.383-.056-.74-.138-1.096-.055-.248-.14-.468-.222-.688l-.166-.328c-.055-.138-.14-.247-.222-.385l-.166-.246c-.138-.193-.277-.357-.415-.549a5.607 5.607 0 0 0-1.606-1.29L66.337 38.394a6.145 6.145 0 0 0-.97-.44 5.86 5.86 0 0 0-1.385-.246h-.36c-.137 0-.248 0-.386.026a5.658 5.658 0 0 0-.942.165c-.055.027-.11.027-.166.056-.415.11-.803.301-1.191.52l-17.773 10.4a4.548 4.548 0 0 0-1.33 1.18c-.137.192-.276.384-.387.576-.055.11-.11.192-.166.302l-.083.246Z" fill="#d6f0ff"/><path d="M64.312 89.288h-.194a5.512 5.512 0 0 1-2.686-.684L42.552 78.04a3.737 3.737 0 0 1-.748-.549 3.31 3.31 0 0 1-.554-.714 3.998 3.998 0 0 1-.47-1.29c-.029-.163-.029-.301-.029-.465V53.537c0-.219 0-.465.029-.686.053-.575.192-1.14.415-1.674L36.1 48.078l-5.98-3.32c-.554 1.152-.83 2.468-.83 3.841v32.047a5.322 5.322 0 0 0 2.685 4.528l28.157 15.776a8.023 8.023 0 0 0 4.014 1.016h.14c0-4.089-.029-6.997-.029-6.997l.055-5.68z" fill="#083042"/><path d="M64.312 89.288h-.194a5.512 5.512 0 0 1-2.686-.684L42.552 78.04a3.737 3.737 0 0 1-.748-.549 3.31 3.31 0 0 1-.554-.714 3.998 3.998 0 0 1-.47-1.29c-.029-.163-.029-.301-.029-.465V53.537c0-.219 0-.465.029-.686.053-.575.192-1.14.415-1.674L36.1 48.078l-5.98-3.32c-.554 1.152-.83 2.468-.83 3.841v32.047a5.322 5.322 0 0 0 2.685 4.528l28.157 15.776a8.023 8.023 0 0 0 4.014 1.016h.14c0-4.089-.029-6.997-.029-6.997l.055-5.68z" fill="#041619"/><path d="m94.266 41.109-26.799-15.01a8.066 8.066 0 0 0-8.029.083l-26.52 15.504a7.049 7.049 0 0 0-2.826 3.073l6.01 3.32 5.093 3.099.082-.246c.056-.111.111-.22.166-.302.111-.192.25-.384.388-.576.36-.467.803-.85 1.33-1.18l17.772-10.4c.38-.213.777-.387 1.191-.52.056-.027.111-.027.166-.056.308-.084.623-.138.941-.164.138 0 .249-.028.388-.028h.36c.469.03.933.111 1.384.246.34.108.665.255.969.441l17.966 10.07a5.99 5.99 0 0 1 1.608 1.289c.137.164.277.357.414.548l.167.246 4.595-3.044 6.229-3.704c-.803-1.071-1.827-2.032-3.045-2.69z" fill="#3ddb85"/><path d="m94.266 41.109-26.799-15.01a8.066 8.066 0 0 0-8.029.083l-26.52 15.504a7.049 7.049 0 0 0-2.826 3.073l6.01 3.32 5.093 3.099.082-.246c.056-.111.111-.22.166-.302.111-.192.25-.384.388-.576.36-.467.803-.85 1.33-1.18l17.772-10.4c.38-.213.777-.387 1.191-.52.056-.027.111-.027.166-.056.308-.084.623-.138.941-.164.138 0 .249-.028.388-.028h.36c.469.03.933.111 1.384.246.34.108.665.255.969.441l17.966 10.07a5.99 5.99 0 0 1 1.608 1.289c.137.164.277.357.414.548l.167.246 4.595-3.044 6.229-3.704c-.803-1.071-1.827-2.032-3.045-2.69z" fill="#37bf6e"/><path d="M86.46 50.602c.083.136.139.246.221.384l.167.329a4.783 4.783 0 0 1 .36 1.783V73.54a5.414 5.414 0 0 1-.25 1.646c-.027.054-.027.11-.055.164a3.423 3.423 0 0 1-.193.468c-.057.135-.14.273-.195.41-.11.193-.249.384-.388.577a6.243 6.243 0 0 1-.719.767c-.166.165-.36.302-.554.44-.111.054-.193.137-.304.192L66.776 88.602a5.841 5.841 0 0 1-2.492.742v5.679s0 2.909.028 6.997a7.785 7.785 0 0 0 3.849-1.097l26.52-15.504c2.465-1.453 3.96-4.088 3.932-6.913V47.995c-.027-1.482-.525-2.882-1.355-4.089l-6.231 3.705z" fill="#4285f4"/><path d="M86.46 50.602c.083.136.139.246.221.384l.167.329a4.783 4.783 0 0 1 .36 1.783V73.54a5.414 5.414 0 0 1-.25 1.646c-.027.054-.027.11-.055.164a3.423 3.423 0 0 1-.193.468c-.057.135-.14.273-.195.41-.11.193-.249.384-.388.577a6.243 6.243 0 0 1-.719.767c-.166.165-.36.302-.554.44-.111.054-.193.137-.304.192L66.776 88.602a5.841 5.841 0 0 1-2.492.742v5.679s0 2.909.028 6.997a7.785 7.785 0 0 0 3.849-1.097l26.52-15.504c2.465-1.453 3.96-4.088 3.932-6.913V47.995c-.027-1.482-.525-2.882-1.355-4.089l-6.231 3.705z" fill="#3870b2"/><path d="M62.155 37.982c-.416.11-.804.302-1.19.52l-17.774 10.4 17.772-10.398a4.54 4.54 0 0 1 1.19-.52z" fill="#d6f0ff"/><path opacity=".1" d="M62.155 37.982c-.416.11-.804.302-1.19.52l-17.774 10.4 17.772-10.398a4.54 4.54 0 0 1 1.19-.52z" fill="#000"/><path d="M85.88 49.806a5.615 5.615 0 0 0-1.605-1.29l-17.968-10.07 17.967 10.07a5.6 5.6 0 0 1 1.606 1.29z" fill="#d6f0ff"/><path opacity=".1" d="M85.88 49.806a5.615 5.615 0 0 0-1.605-1.29l-17.968-10.07 17.967 10.07a5.6 5.6 0 0 1 1.606 1.29z" fill="#000"/><path d="M86.848 51.289a6.7 6.7 0 0 1 .22.684c-.055-.219-.14-.438-.222-.684z" fill="#d6f0ff"/><path opacity=".1" d="M86.848 51.289a6.7 6.7 0 0 1 .22.684c-.055-.219-.14-.438-.222-.684z" fill="#000"/><path d="M86.956 75.186a5.34 5.34 0 0 0 .249-1.646V53.098 73.54a5.34 5.34 0 0 1-.25 1.646z" fill="#d6f0ff"/><path opacity=".1" d="M86.956 75.186a5.34 5.34 0 0 0 .249-1.646V53.098 73.54a5.34 5.34 0 0 1-.25 1.646z" fill="#000"/></svg>
+
+        Jetpack Compose
+    </span>
+
+    <form id="create-form">
+        <div class="form-group">
+            <fieldset>
+                <legend>App Name</legend>
+                <!--Gsjddhj-->
+                <input type="text" id="app_name" name="app_name" required value="MyApp">
+            </fieldset>
+        </div>
+        
+        <div class="form-group">
+            <fieldset>
+                <legend>Package Name</legend>
+                <input type="text" id="package_name" name="package_name" required  value="com.example.myapp">
+            </fieldset>
+        </div>
+        <div class="form-group">
+            <fieldset>
+                <legend>Save location</legend>
+                <input type="text" id="save_location" name="save_location"  value="/termux/home/workspace">
+            </fieldset>
+        </div>
+        
+        <div class="form-group">
+            <fieldset>
+                <legend>Minimum SDK</legend>
+                <select id="min_sdk" name="min_sdk">
+                    {% for sdk in range(21,35) %}
+                    <option value="{{ sdk }}" {% if sdk==24 %}selected{% endif %}>API {{ sdk }} (Android {% if sdk==21 %}5.0{% elif sdk==22 %}5.1{% elif sdk==23 %}6.0{% elif sdk==24 %}7.0{% elif sdk==25 %}7.1{% elif sdk==26 %}8.0{% elif sdk==27 %}8.1{% elif sdk==28 %}9.0{% elif sdk==29 %}10.0{% elif sdk==30 %}11.0{% elif sdk==31 %}12.0{% elif sdk==32 %}12L{% elif sdk==33 %}13.0{% elif sdk==34 %}14.0{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </fieldset>
+        </div>
+        
+        <button type="submit" class="btn">Create Project</button>
+    </form>
+
+    <div id="logContainer">
+        <div class="log-header">
+            <h2>Build Output</h2>
+            <button class="close-log" onclick="
+              document.getElementById('logContainer').style.display='none';
+            ">×</button>
+        </div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('create-form');
+        const logEl = document.getElementById('log');
+        const logContainer = document.getElementById('logContainer');
+        
+        form.addEventListener('submit', async e => {
+          document.getElementById('back-btn').style.display ='none';
+            e.preventDefault();
+            form.style.display = "none";
+            logContainer.style.display = "block";
+            logEl.textContent = '';
+            
+            const data = Object.fromEntries(new FormData(form).entries());
+            const res = await fetch('/create_project', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            
+            while(true) {
+                const {value, done} = await reader.read();
+                if(done) break;
+                logEl.textContent += decoder.decode(value);
+                logEl.scrollTop = logEl.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+

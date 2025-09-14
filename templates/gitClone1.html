@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Clone - AndroidIDE</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body {
+            user-select: none;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+        }
+        .header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            margin-right: 15px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .back-btn:hover {
+            background-color: #f1f3f4;
+        }
+        .back-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #5f6368;
+        }
+        h1 {
+            font-size: 20px;
+            font-weight: 500;
+            color: #3c4043;
+        }
+        .container {
+            padding: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+            margin-bottom: 24px;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .input-container {
+            position: relative;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 13px 15px;
+            transition: border-color 0.2s;
+        }
+        .input-container:focus-within {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        .input-label {
+            position: absolute;
+            top: -10px;
+            left: 8px;
+            background: white;
+            padding: 0 8px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #202124;
+            background: transparent;
+        }
+        input::placeholder {
+            color: #9aa0a6;
+        }
+        
+        .btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            min-width: 120px;
+            margin-left: auto;
+        }
+        .btn:hover {
+            background-color: #1967d2;
+            box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+        }
+        .btn:active {
+            background-color: #185abc;
+        }
+        .btn:disabled {
+            background-color: #f1f3f4;
+            color: #bdc1c6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .btn .spinner {
+            margin-right: 8px;
+            display: none;
+        }
+        .btn.loading .spinner {
+            display: block;
+        }
+        
+        .log-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+            overflow: hidden;
+        }
+        .log-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #dadce0;
+        }
+        .log-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #3c4043;
+            display: flex;
+            align-items: center;
+        }
+        .log-title .icon {
+            margin-right: 8px;
+            color: #5f6368;
+        }
+        .log-actions {
+            display: flex;
+            align-items: center;
+        }
+        .log-action-btn {
+            background: none;
+            border: none;
+            color: #5f6368;
+            padding: 4px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        .log-action-btn:hover {
+            background: rgba(60, 64, 67, 0.08);
+        }
+        #log-content {
+            padding: 16px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #202124;
+            background: #f8f9fa;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            display: none;
+        }
+        #log-content.visible {
+            display: block;
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 12px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .status-indicator::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .status-success .status-indicator::before {
+            background-color: #34a853;
+        }
+        .status-error .status-indicator::before {
+            background-color: #ea4335;
+        }
+        .status-loading .status-indicator::before {
+            background-color: #fbbc04;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+        </button>
+        <h1>Git Clone</h1>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <form id="git-form">
+                <div class="form-group">
+                    <div class="input-container">
+                        <span class="input-label">Repository URL</span>
+                        <input type="text" id="repo_url" name="repo_url" placeholder="https://github.com/username/repository.git" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="clone-btn">
+                    <span class="spinner"></span>
+                    <span>Clone Repository</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="log-container">
+            <div class="log-header" id="log-header">
+                <div class="log-title">
+                    <span class="icon material-icons">terminal</span>
+                    Output
+                    <span class="status-indicator" id="status-indicator"></span>
+                </div>
+                <div class="log-actions">
+                    <button class="log-action-btn" id="clear-log" title="Clear output">
+                        <span class="material-icons">clear_all</span>
+                    </button>
+                    <button class="log-action-btn" id="toggle-log" title="Toggle output visibility">
+                        <span class="material-icons" id="toggle-icon">expand_more</span>
+                    </button>
+                </div>
+            </div>
+            <div id="log-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('git-form');
+        const logContent = document.getElementById('log-content');
+        const logHeader = document.getElementById('log-header');
+        const toggleLogBtn = document.getElementById('toggle-log');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const clearLogBtn = document.getElementById('clear-log');
+        const cloneBtn = document.getElementById('clone-btn');
+        const statusIndicator = document.getElementById('status-indicator');
+        
+        // Toggle log visibility
+        toggleLogBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            logContent.classList.toggle('visible');
+            toggleIcon.textContent = logContent.classList.contains('visible') ? 'expand_less' : 'expand_more';
+        });
+        
+        // Clear log
+        clearLogBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            logContent.textContent = '';
+        });
+        
+        // Expand/collapse log when clicking header
+        logHeader.addEventListener('click', () => {
+            logContent.classList.toggle('visible');
+            toggleIcon.textContent = logContent.classList.contains('visible') ? 'expand_less' : 'expand_more';
+        });
+        
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(form).entries());
+            
+            // Show loading state
+            cloneBtn.classList.add('loading');
+            cloneBtn.disabled = true;
+            logContent.classList.add('visible');
+            toggleIcon.textContent = 'expand_less';
+            
+            // Update status indicator
+            statusIndicator.textContent = 'Cloning...';
+            statusIndicator.parentElement.classList.remove('status-success', 'status-error');
+            statusIndicator.parentElement.classList.add('status-loading');
+            
+            // Clear previous log content
+            logContent.textContent = 'Cloning repository...\n';
+            
+            try {
+                const res = await fetch('/git_clone', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                
+                // Update log content
+                logContent.textContent += result.message;
+                
+                if (result.status === "ok") {
+                    statusIndicator.textContent = 'Success';
+                    statusIndicator.parentElement.classList.remove('status-loading', 'status-error');
+                    statusIndicator.parentElement.classList.add('status-success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/open_project';
+                    }, 2000);
+                } else {
+                    statusIndicator.textContent = 'Failed';
+                    statusIndicator.parentElement.classList.remove('status-loading', 'status-success');
+                    statusIndicator.parentElement.classList.add('status-error');
+                }
+            } catch (error) {
+                logContent.textContent += 'An error occurred: ' + error;
+                statusIndicator.textContent = 'Error';
+                statusIndicator.parentElement.classList.remove('status-loading', 'status-success');
+                statusIndicator.parentElement.classList.add('status-error');
+            } finally {
+                cloneBtn.classList.remove('loading');
+                cloneBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
