@@ -1,4 +1,4 @@
-# AIDE - Android App Development on Android Phone 📱
+# AndroidIDE - Android App Development on Android Phone 📱
 
 AIDE lets you **create and build Android apps directly on your Android phone**, without Android Studio or a computer.  
 It includes **Python-based tools** and utilities to generate projects, manage imports, and simplify the development process.
