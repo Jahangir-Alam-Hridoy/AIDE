@@ -224,6 +224,15 @@
         const form = document.getElementById('create-form');
         const logEl = document.getElementById('log');
         const logContainer = document.getElementById('logContainer');
+
+        const appName = document.getElementById('app_name');
+        const packageName = document.getElementById('package_name');
+        appName.addEventListener('input', 
+            function(){
+                packageName.value = "com.example." + appName.value.toLowerCase();
+            }
+            
+        )
         
         form.addEventListener('submit', async e => {
           document.getElementById('back-btn').style.display ='none';
