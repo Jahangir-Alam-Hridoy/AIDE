@@ -7,43 +7,129 @@ from pathlib import Path
 # Core imports for Jetpack Compose + Kotlin
 # ======================================
 IMPORT_MAP = {
-    # Layout
+    # ===============================
+    # Layout (foundation.layout)
+    # ===============================
     "Column": "import androidx.compose.foundation.layout.Column",
     "Row": "import androidx.compose.foundation.layout.Row",
     "Box": "import androidx.compose.foundation.layout.Box",
     "Spacer": "import androidx.compose.foundation.layout.Spacer",
     "fillMaxSize": "import androidx.compose.foundation.layout.fillMaxSize",
+    "fillMaxWidth": "import androidx.compose.foundation.layout.fillMaxWidth",
+    "fillMaxHeight": "import androidx.compose.foundation.layout.fillMaxHeight",
+    "wrapContentSize": "import androidx.compose.foundation.layout.wrapContentSize",
     "padding": "import androidx.compose.foundation.layout.padding",
+    "size": "import androidx.compose.foundation.layout.size",
+    "width": "import androidx.compose.foundation.layout.width",
+    "height": "import androidx.compose.foundation.layout.height",
     "background": "import androidx.compose.foundation.background",
+    "weight": "import androidx.compose.foundation.layout.weight",
+    "AspectRatio": "import androidx.compose.foundation.layout.aspectRatio",
+    "FlowRow": "import androidx.compose.foundation.layout.FlowRow",
+    "FlowColumn": "import androidx.compose.foundation.layout.FlowColumn",
+
+    # ===============================
+    # Foundation (basic widgets)
+    # ===============================
+    "Image": "import androidx.compose.foundation.Image",
+    "BasicText": "import androidx.compose.foundation.text.BasicText",
+    "BasicTextField": "import androidx.compose.foundation.text.BasicTextField",
+    "ClickableText": "import androidx.compose.foundation.text.ClickableText",
+    "LazyColumn": "import androidx.compose.foundation.lazy.LazyColumn",
+    "LazyRow": "import androidx.compose.foundation.lazy.LazyRow",
+    "items": "import androidx.compose.foundation.lazy.items",
+    "itemsIndexed": "import androidx.compose.foundation.lazy.itemsIndexed",
+    "rememberLazyListState": "import androidx.compose.foundation.lazy.rememberLazyListState",
+    "verticalScroll": "import androidx.compose.foundation.verticalScroll",
+    "horizontalScroll": "import androidx.compose.foundation.horizontalScroll",
+    "rememberScrollState": "import androidx.compose.foundation.rememberScrollState",
+    "BorderStroke": "import androidx.compose.foundation.BorderStroke",
+
+    # ===============================
     # Material3
+    # ===============================
     "Button": "import androidx.compose.material3.Button",
     "Text": "import androidx.compose.material3.Text",
     "Surface": "import androidx.compose.material3.Surface",
     "MaterialTheme": "import androidx.compose.material3.MaterialTheme",
     "OutlinedTextField": "import androidx.compose.material3.OutlinedTextField",
+    "TextField": "import androidx.compose.material3.TextField",
     "Scaffold": "import androidx.compose.material3.Scaffold",
     "TopAppBar": "import androidx.compose.material3.TopAppBar",
     "Card": "import androidx.compose.material3.Card",
+    "AlertDialog": "import androidx.compose.material3.AlertDialog",
+    "Checkbox": "import androidx.compose.material3.Checkbox",
+    "Switch": "import androidx.compose.material3.Switch",
+    "RadioButton": "import androidx.compose.material3.RadioButton",
+    "Slider": "import androidx.compose.material3.Slider",
+    "LinearProgressIndicator": "import androidx.compose.material3.LinearProgressIndicator",
+    "CircularProgressIndicator": "import androidx.compose.material3.CircularProgressIndicator",
+    "FloatingActionButton": "import androidx.compose.material3.FloatingActionButton",
+    "Icon": "import androidx.compose.material3.Icon",
+    "IconButton": "import androidx.compose.material3.IconButton",
+    "DropdownMenu": "import androidx.compose.material3.DropdownMenu",
+    "DropdownMenuItem": "import androidx.compose.material3.DropdownMenuItem",
+    "SnackbarHost": "import androidx.compose.material3.SnackbarHost",
+    "SnackbarHostState": "import androidx.compose.material3.SnackbarHostState",
+
+    # ===============================
     # Runtime
+    # ===============================
     "Composable": "import androidx.compose.runtime.Composable",
     "remember": "import androidx.compose.runtime.remember",
     "mutableStateOf": "import androidx.compose.runtime.mutableStateOf",
+    "mutableIntStateOf": "import androidx.compose.runtime.mutableIntStateOf",
+    "mutableLongStateOf": "import androidx.compose.runtime.mutableLongStateOf",
+    "mutableFloatStateOf": "import androidx.compose.runtime.mutableFloatStateOf",
     "LaunchedEffect": "import androidx.compose.runtime.LaunchedEffect",
+    "SideEffect": "import androidx.compose.runtime.SideEffect",
+    "DisposableEffect": "import androidx.compose.runtime.DisposableEffect",
     "rememberCoroutineScope": "import androidx.compose.runtime.rememberCoroutineScope",
     "getValue": "import androidx.compose.runtime.getValue",
     "setValue": "import androidx.compose.runtime.setValue",
     "rememberSaveable": "import androidx.compose.runtime.saveable.rememberSaveable",
-    # UI
+    "produceState": "import androidx.compose.runtime.produceState",
+    "derivedStateOf": "import androidx.compose.runtime.derivedStateOf",
+
+    # ===============================
+    # UI Core
+    # ===============================
     "Modifier": "import androidx.compose.ui.Modifier",
     "Alignment": "import androidx.compose.ui.Alignment",
     "Color": "import androidx.compose.ui.graphics.Color",
+    "Brush": "import androidx.compose.ui.graphics.Brush",
+    "Shape": "import androidx.compose.ui.graphics.Shape",
+    "CircleShape": "import androidx.compose.foundation.shape.CircleShape",
+    "RoundedCornerShape": "import androidx.compose.foundation.shape.RoundedCornerShape",
     "sp": "import androidx.compose.ui.unit.sp",
     "dp": "import androidx.compose.ui.unit.dp",
-    # AndroidX / OS helpers
+    "IntOffset": "import androidx.compose.ui.unit.IntOffset",
+    "IntSize": "import androidx.compose.ui.unit.IntSize",
+
+    # ===============================
+    # Animation
+    # ===============================
+    "animateFloatAsState": "import androidx.compose.animation.core.animateFloatAsState",
+    "tween": "import androidx.compose.animation.core.tween",
+    "spring": "import androidx.compose.animation.core.spring",
+    "keyframes": "import androidx.compose.animation.core.keyframes",
+    "InfiniteTransition": "import androidx.compose.animation.core.InfiniteTransition",
+    "rememberInfiniteTransition": "import androidx.compose.animation.core.rememberInfiniteTransition",
+
+    # ===============================
+    # AndroidX / Activity
+    # ===============================
     "Bundle": "import android.os.Bundle",
     "ComponentActivity": "import androidx.activity.ComponentActivity",
-}
+    "setContent": "import androidx.activity.compose.setContent",
+    "Context": "import android.content.Context",
+    "Intent": "import android.content.Intent",
 
+    # ===============================
+    # Tools
+    # ===============================
+    "Preview": "import androidx.compose.ui.tooling.preview.Preview",
+}
 # ======================================
 # Detect missing imports
 # ======================================
