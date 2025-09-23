@@ -14,7 +14,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for Android WebView
 
-HOME_DIR = os.path.expanduser("~")
+HOME_DIR = os.path.expanduser("~/")
 WORKSPACE_DIR = os.path.join(HOME_DIR, "workspace")
 TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "AIDE", "MyApplication")
 TEMPLATE_PACKAGE = "com.example.myapplication"
@@ -173,7 +173,66 @@ def delete_item():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+#==================================
+@app.route('/editor')
+def ide():
+    return render_template('editor.html')
 
+# ✅ নতুন API - Files list (Fixed)
+@app.route('/api/files')
+def list_files():
+    try:
+        files = []
+        # ✅ Check if directory exists
+        if not os.path.exists(WORKSPACE_DIR):
+            return jsonify([])
+            
+        for root, dirs, filenames in os.walk(WORKSPACE_DIR):
+            for file in filenames:
+                if any(file.endswith(ext) for ext in ['.kt', '.java', '.xml', '.gradle', '.txt']):
+                    # ✅ Relative path ব্যবহার করুন
+                    full_path = os.path.relpath(os.path.join(root, file), WORKSPACE_DIR)
+                    files.append(full_path)
+        return jsonify(files)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+# ✅ নতুন API - Get file content (Fixed)
+@app.route('/api/files/<path:filename>')
+def get_file(filename):
+    try:
+        # ✅ PROJECTS_DIR এর সাথে join করুন
+        filepath = os.path.join(WORKSPACE_DIR, filename)
+        
+        # ✅ File exists check
+        if not os.path.exists(filepath):
+            return jsonify({'error': 'File not found'})
+            
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return jsonify({'content': content})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+# ✅ নতুন API - Save file (Fixed)
+@app.route('/api/save', methods=['POST'])
+def save_file():
+    try:
+        data = request.json
+        filepath = os.path.join(WORKSPACE_DIR, data['filepath'])
+        code = data['code']
+        
+        # ✅ Directory create করুন যদি না থাকে
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(code)
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
+#=================================
 
 
 @app.route("/run_project")
