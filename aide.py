@@ -256,6 +256,34 @@ def save_file():
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({'error': str(e)})
+
+
+@app.route('/api/run', methods=['POST'])
+def install_apk():
+    try:
+        data = request.json
+        # ✅ Find APK file
+        base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
+        apk_path = os.path.join(base_dir, 'app/build/outputs/apk/debug/app-debug.apk')
+        
+        if os.path.exists(apk_path):
+            # ✅ Install APK
+            result = subprocess.run(
+                ['termux-open', apk_path],
+                capture_output=True,
+                text=True
+            )
+            return jsonify({
+                'message': 'APK installed successfully',
+                'output': result.stdout,
+                'error': result.stderr
+            })
+        else:
+            return jsonify({'error': 'APK not found. Build the project first.'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
 #=================================
 
 
