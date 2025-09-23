@@ -85,22 +85,10 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.35);
         }
         .action-btn:active { transform: translateY(1px); }
-        .action-btn.secondary { background: #3a3a3a; }
+        .action-btn.secondary { background: none;box-shadow: none; font-size: 22px; }
         .action-btn.success { background: var(--accent); }
         .action-btn.warning { background: var(--warn); }
 
-        /* File info */
-        .file-info {
-            margin-left: auto;
-            font-size: 12px;
-            color: var(--muted);
-            padding: 0 8px;
-            flex-shrink: 0;
-            max-width: 40%;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-        }
 
         /* Editor area */
         .editor-fullscreen {
@@ -225,7 +213,7 @@
         @media (max-width: 480px) {
             .top-bar { gap: 8px; padding: calc(6px + var(--safe-top)) 10px 8px 10px; min-height: 56px; }
             .action-btn { padding: 10px 12px; height: 44px; font-size: 14px; min-width: 48px; }
-            .file-info { font-size: 11px; max-width: 50%; }
+            
         }
     </style>
 </head>
@@ -237,7 +225,7 @@
     <div class="file-manager" id="file-manager">
         <div class="file-manager-header">
             <div id="fileManagerTitle" class="file-manager-title"></div>
-            <button class="action-btn secondary" onclick="closeFileManager()">✕ Close</button>
+            <button class="action-btn secondary" onclick="closeFileManager()">✕</button>
         </div>
         <div class="file-list" id="file-list">
             <div style="padding: 20px; color: #aaa; text-align: center;">
@@ -259,15 +247,12 @@
     <div class="mobile-container">
         <!-- Top Action Bar -->
         <div class="top-bar">
-            <button class="action-btn secondary" onclick="toggleFileManager()">📁 Files</button>
+            <button class="action-btn secondary" onclick="toggleFileManager()">☰</button>
             <button class="action-btn" onclick="saveFile()">💾 Save</button>
             <button class="action-btn success" onclick="buildProject()">🔨 Build</button>
             <button class="action-btn warning" onclick="runProject()">▶️ Run</button>
             <button class="action-btn secondary" onclick="toggleTerminal()">📟 Terminal</button>
             
-            <div class="file-info" id="file-info">
-                No file selected
-            </div>
         </div>
         
         <!-- Full Screen Editor -->
@@ -306,14 +291,16 @@
     // Initialize Editor
     window.addEventListener('load', function() {
         require(['vs/editor/editor.main'], function() {
-            editor = monaco.editor.create(document.getElementById('editor'), {
-                value: `// Android IDE Mobile - Full Screen Editor
+          let initialContent = `// Android IDE Mobile - Full Screen Editor
 // Tap [📁 Files] button to open file manager
 // Open a Kotlin/Java/XML file to start coding
 
 fun main() {
     println("Hello from Android IDE!")
-}`,
+}`;
+
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                value: initialContent,
                 language: 'kotlin',
                 theme: 'vs-dark',
                 automaticLayout: true,
@@ -423,12 +410,12 @@ fun main() {
                 `;
                 return;
             }
-            
+
             files.forEach(file => {
                 const div = document.createElement('div');
                 div.className = 'file-item';
                 
-                const ext = file.split('.').pop();
+                const ext = getFileExtension(file);
                 const icon = getFileIcon(ext);
                 
                 div.innerHTML = `
@@ -450,17 +437,43 @@ fun main() {
         }
     }
 
-    function getFileIcon(ext) {
-        const icons = {
-            'kt': '🅺', 'java': '📄', 'xml': '📋',
-            'gradle': '🐘', 'txt': '📝', 'md': '📖',
-            'json': '🔧', 'yml': '⚙️', 'yaml': '⚙️',
-            'html': '🌐', 'css': '🎨', 'js': '📜',
-            'png': '🖼️', 'jpg': '🖼️', 'jpeg': '🖼️'
-        };
-        return icons[ext] || '📁';
+    // NEW CODE - এটা বসান
+function getFileExtension(file) {
+    // First check for multi-part extensions
+    if (file.endsWith('.gradle.kts')) return 'gradle.kts';
+    if (file.endsWith('.gitignore')) return 'gitignore';
+    
+    // Then check regular extensions
+    const parts = file.split('.');
+    if (parts.length > 1) {
+        return parts.pop().toLowerCase();
     }
+    return ''; // No extension
+}
 
+   // NEW CODE - এটা বসান
+function getFileIcon(ext) {
+    const icons = {
+        'kt': '🅺', 
+        'java': '📄', 
+        'xml': '📋',
+        'gradle': '🐘', 
+        'gradle.kts': '🐘🅺', // ✅ Added for gradle.kts
+        'txt': '📝', 
+        'md': '📖',
+        'json': '🔧', 
+        'yml': '⚙️', 
+        'yaml': '⚙️',
+        'html': '🌐', 
+        'css': '🎨', 
+        'js': '📜',
+        'png': '🖼️', 
+        'jpg': '🖼️', 
+        'jpeg': '🖼️',
+        'gitignore': '🔒'
+    };
+    return icons[ext] || '📁';
+}
     async function loadFile(filename) {
         try {
             updateStatus(`Loading: ${filename}`);
@@ -477,7 +490,7 @@ fun main() {
             // Then set language with delay for proper syntax highlighting
             setTimeout(() => {
                 const ext = filename.split('.').pop();
-                const lang = getLanguage(ext);
+                const lang = getLanguage(ext, filename);
                 
                 const model = editor.getModel();
                 if (model) {
@@ -487,7 +500,6 @@ fun main() {
                 document.getElementById('language-info').textContent = lang;
             }, 50);
             
-            document.getElementById('file-info').textContent = filename;
             updateStatus(`Editing: ${filename}`);
             
         } catch (error) {
@@ -496,26 +508,31 @@ fun main() {
         }
     }
 
-    function getLanguage(ext) {
-        const languages = {
-            'kt': 'kotlin',
-            'java': 'java', 
-            'xml': 'xml',
-            'gradle': 'groovy',
-            'txt': 'plaintext',
-            'md': 'markdown',
-            'json': 'json',
-            'yml': 'yaml',
-            'yaml': 'yaml',
-            'html': 'html',
-            'css': 'css',
-            'js': 'javascript',
-            'properties': 'ini',
-            'gitignore': 'plaintext'
-        };
-        return languages[ext.toLowerCase()] || 'plaintext';
-    }
-
+    // NEW CODE - এটা বসান
+function getLanguage(ext, filename) {
+    // First check filename for specific patterns
+    if (filename && filename.endsWith('.gradle.kts')) return 'kotlin';
+    
+    // Then check by extension
+    const languages = {
+        'kt': 'kotlin',
+        'java': 'java', 
+        'xml': 'xml',
+        'gradle': 'groovy',
+        'gradle.kts': 'kotlin', // ✅ Added this line
+        'txt': 'plaintext',
+        'md': 'markdown',
+        'json': 'json',
+        'yml': 'yaml',
+        'yaml': 'yaml',
+        'html': 'html',
+        'css': 'css',
+        'js': 'javascript',
+        'properties': 'ini',
+        'gitignore': 'plaintext'
+    };
+    return languages[ext.toLowerCase()] || 'plaintext';
+}
     async function saveFile() {
         if (!currentFile) {
             alert('Please open a file first');
@@ -678,6 +695,7 @@ Server: Flask + Termux
         closeAllModals();
     });
 
+/*
     // Prevent accidental page refresh
     window.addEventListener('beforeunload', function(e) {
         if (editor.getValue() !== editor.getOriginalOptions().value) {
@@ -685,6 +703,13 @@ Server: Flask + Termux
             e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
         }
     });
+    */
+window.addEventListener('beforeunload', function(e) {
+    if (editor.getValue() !== initialContent) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    }
+});
 
     // Keyboard shortcuts (for devices with physical keyboards)
     document.addEventListener('keydown', function(e) {
