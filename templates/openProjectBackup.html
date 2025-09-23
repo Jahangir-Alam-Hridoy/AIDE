@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Explorer</title>
+    <style>
+        body {user-select: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;  margin: 0;  color: #1c1e21; }
+        .container { width: 92%; padding: 12px; background: #fff;  border-radius: 8px;  margin: auto; }
+        h1 { color: black; border-bottom: 1px solid #ddd; padding-bottom: 1rem; margin-top: 0; }
+        ul { list-style: none; padding: 0; }
+        .item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; margin: 0.5rem 0; border-radius: 6px; background-color: #F9F9F9; transition: background-color 0.2s ease; }
+        .item:hover { background-color: #f0f2f5; }
+        .item-name { font-weight: 500; }
+        .item-name .dir-tag { font-size: 0.8em; color: #65676b; margin-left: 8px; }
+        .menu-btn { background: none; border: none; font-size: 1.5rem; line-height: 1; color: #65676b; padding: 4px 8px; border-radius: 50%; }
+        .menu-btn:hover { background-color: #e4e6eb; }
+        #contextMenu { position: fixed; display: none; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; padding: 0.5rem 0; }
+        #contextMenu button { display: block; width: 100%; padding: 0.75rem 1.5rem; border: none; background: none; text-align: left; font-size: 0.95rem; }
+        #contextMenu button:hover { background-color: #f0f2f5; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #fff; padding: 1.5rem; border-radius: 8px; width: 80%; max-width: 700px; max-height: 50vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .output-content { background: #E8E8E8; color: #000000; padding: 1rem; margin: -10px; border-radius: 6px; white-space: pre; flex-grow: 1; overflow-y: auto; overflow-x: auto; font-family: "SF Mono", "Menlo", "Monaco", monospace; font-size: 0.9rem; }
+        .status-success { color: #31a24c; font-weight: bold; }
+        .status-error { color: #fa383e; font-weight: bold; }
+        .modal-footer { margin-top: 1rem; text-align: right; }
+        .close-btn { background: #e4e6eb; color: #1c1e21; border: none; padding: 0.6rem 1.2rem; border-radius: 6px;  font-weight: bold; }
+        
+        /* Custom Confirm Dialog Styles */
+        #confirmModal { z-index: 3000; }
+        #confirmModal .modal { max-width: 400px; }
+        .confirm-message { margin-bottom: 1.5rem; font-size: 1rem; }
+        .confirm-buttons { display: flex; justify-content: flex-end; gap: 10px; }
+        .confirm-yes { background-color: #fa383e; color: white; }
+        .confirm-no { background-color: #e4e6eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">Projects</h1>
+        <ul id="itemList">
+            {% for item in items %}
+            <li class="item" data-path="{{ item.path|urlencode }}">
+                <span class="item-name">
+                    {{ item.name }}
+                    {% if item.is_dir %}<span class="dir-tag">[DIR]</span>{% endif %}
+                </span>
+                <button class="menu-btn" onclick="showContextMenu(event, this)">⋮</button>
+            </li>
+            {% endfor %}
+            {% if not items %}
+                <p>No projects found in workspace.</p>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div id="contextMenu">
+        <button id="runBtn">▶ Run Project</button>
+        <button id="deleteBtn">🗑 Delete</button>
+        <button class="btn" onclick="setTimeout(()=>{window.location.href='/editor'}, 300)">Editor</button>
+
+    </div>
+
+    <!-- Output Modal -->
+    <div class="modal-overlay" id="outputModal">
+        <div class="modal">
+            <div class="modal-header"><h3 id="outputTitle">Project Output</h3></div>
+            <div class="output-content" id="outputContent"></div>
+            <div class="modal-footer"><button class="close-btn" onclick="hideModal('outputModal')">Close</button></div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <div class="modal-header"><h3>⚠️ Confirm Deletion</h3></div>
+            <div class="confirm-message" id="confirmMessage"></div>
+            <div class="modal-footer confirm-buttons">
+                <button class="close-btn confirm-no" id="confirmNo">Cancel</button>
+                <button class="close-btn confirm-yes" id="confirmYes">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const contextMenu = document.getElementById('contextMenu');
+        const runBtn = document.getElementById('runBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+        
+        let selectedItemPath = null;
+        let confirmResolve = null;
+
+        function showContextMenu(event, button) {
+            event.preventDefault();
+
+            const item = button.closest('.item');
+            selectedItemPath = decodeURIComponent(item.dataset.path);
+            
+            contextMenu.style.display = 'block';
+            contextMenu.style.top = (event.clientY - 20) + 'px';
+            contextMenu.style.left = (event.clientX - 130) + 'px';
+        }
+
+        window.addEventListener('click', (event) => {
+            if (event.target.closest('.menu-btn')) {
+                return;
+            }
+            if (event.target.closest('#contextMenu')) {
+                return;
+            }
+            if (contextMenu.style.display === 'block') {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        function showModal(id) { 
+            document.getElementById(id).classList.add('active'); 
+        }
+        
+        function hideModal(id) { 
+            document.getElementById(id).classList.remove('active'); 
+        }
+
+        // Custom confirm function
+        function customConfirm(message) {
+            confirmMessage.textContent = message;
+            showModal('confirmModal');
+            
+            return new Promise((resolve) => {
+                confirmResolve = resolve;
+            });
+        }
+
+        // Confirm button event listeners
+        confirmYes.addEventListener('click', () => {
+            hideModal('confirmModal');
+            if (confirmResolve) confirmResolve(true);
+        });
+
+        confirmNo.addEventListener('click', () => {
+            hideModal('confirmModal');
+            if (confirmResolve) confirmResolve(false);
+        });
+
+        deleteBtn.addEventListener('click', async () => {
+            if (!selectedItemPath) return;
+            
+            const itemName = selectedItemPath.split('/').pop();
+            const confirmed = await customConfirm(`Are you sure you want to delete "${itemName}"?`);
+            
+            if (!confirmed) return;
+            
+            try {
+                const res = await fetch("/delete_item", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ path: selectedItemPath })
+                });
+                const result = await res.json();
+                if (result.status === "ok") {
+                    location.reload();
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (error) {
+                alert("An error occurred: " + error);
+            }
+        });
+
+        runBtn.addEventListener('click', () => {
+            if (!selectedItemPath) return;
+            showModal("outputModal");
+            const outputContent = document.getElementById("outputContent");
+            const outputTitle = document.getElementById("outputTitle");
+            outputContent.textContent = "Starting build process...\\n";
+            outputTitle.textContent = "Building Project";
+
+            const evtSource = new EventSource(`/run_project?path=${encodeURIComponent(selectedItemPath)}`);
+            
+            evtSource.onmessage = function(event) {
+                if (event.data === "[DONE]") {
+                    evtSource.close();
+                    return;
+                }
+                if (event.data.includes("✅ Build completed")) {
+                    outputTitle.innerHTML = '<span class="status-success">Build Successful</span>';
+                    evtSource.close();
+                } else if (event.data.includes("❌ Build failed")) {
+                    outputTitle.innerHTML = '<span class="status-error">Build Failed</span>';
+                    evtSource.close();
+    }
+                    outputContent.innerHTML += event.data + '<br/>';  // <-- changed here
+                    outputContent.scrollTop = outputContent.scrollHeight;
+                };
+
+            evtSource.onerror = function() {
+                outputTitle.innerHTML = '<span class="status-error">Connection Error</span>';
+                evtSource.close();
+            };
+        });
+    </script>
+</body>
+</html>
+
+
