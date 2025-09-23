@@ -236,7 +236,7 @@
     <!-- Slide-in File Manager -->
     <div class="file-manager" id="file-manager">
         <div class="file-manager-header">
-            <div class="file-manager-title">📁 Workspace Files</div>
+            <div id="fileManagerTitle" class="file-manager-title"></div>
             <button class="action-btn secondary" onclick="closeFileManager()">✕ Close</button>
         </div>
         <div class="file-list" id="file-list">
@@ -406,7 +406,9 @@ fun main() {
                 '<div style="padding: 20px; color: #aaa; text-align: center;">Loading files...</div>';
             
             const response = await fetch('/api/files');
-            const files = await response.json();
+            //const files = await response.json();
+            const { files, base } = await response.json();
+            document.getElementById('fileManagerTitle').textContent = "📂 " + base;
             
             const fileList = document.getElementById('file-list');
             fileList.innerHTML = '';

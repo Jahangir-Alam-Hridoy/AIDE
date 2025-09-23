@@ -14,6 +14,8 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for Android WebView
 
+# main.py এর একদম শুরুতে (import এর পরে)
+CURRENT_EDITOR_PATH = None
 HOME_DIR = os.path.expanduser("~/")
 WORKSPACE_DIR = os.path.join(HOME_DIR, "workspace")
 TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "AIDE", "MyApplication")
@@ -174,6 +176,24 @@ def delete_item():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 #==================================
+@app.route('/set_editor_path', methods=['POST'])
+def set_editor_path():
+    global CURRENT_EDITOR_PATH
+    data = request.json
+    filepath = data.get('path')
+
+    if not filepath:
+        return jsonify({'status': 'error', 'message': 'No path provided'})
+
+    abs_path = os.path.join(WORKSPACE_DIR, filepath)
+
+    if not os.path.exists(abs_path):
+        return jsonify({'status': 'error', 'message': 'File/Folder not found'})
+
+    # ✅ গ্লোবাল ভ্যারিয়েবলে সেট করো
+    CURRENT_EDITOR_PATH = abs_path
+    return jsonify({'status': 'ok'})
+
 @app.route('/editor')
 def ide():
     return render_template('editor.html')
@@ -182,18 +202,20 @@ def ide():
 @app.route('/api/files')
 def list_files():
     try:
+        # ✅ এখন থেকে সব লিস্ট CURRENT_EDITOR_PATH এর ভেতর থেকে হবে
+        base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
+
         files = []
-        # ✅ Check if directory exists
-        if not os.path.exists(WORKSPACE_DIR):
+        if not os.path.exists(base_dir):
             return jsonify([])
-            
-        for root, dirs, filenames in os.walk(WORKSPACE_DIR):
+
+        for root, dirs, filenames in os.walk(base_dir):
             for file in filenames:
                 if any(file.endswith(ext) for ext in ['.kt', '.java', '.xml', '.gradle', '.txt']):
-                    # ✅ Relative path ব্যবহার করুন
-                    full_path = os.path.relpath(os.path.join(root, file), WORKSPACE_DIR)
+                    full_path = os.path.relpath(os.path.join(root, file), base_dir)
                     files.append(full_path)
-        return jsonify(files)
+
+        return jsonify({'files': files, 'base': os.path.basename(base_dir)})
     except Exception as e:
         return jsonify({'error': str(e)})
 
@@ -201,15 +223,15 @@ def list_files():
 @app.route('/api/files/<path:filename>')
 def get_file(filename):
     try:
-        # ✅ PROJECTS_DIR এর সাথে join করুন
-        filepath = os.path.join(WORKSPACE_DIR, filename)
-        
-        # ✅ File exists check
+        base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
+        filepath = os.path.join(base_dir, filename)
+
         if not os.path.exists(filepath):
             return jsonify({'error': 'File not found'})
-            
+
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
+
         return jsonify({'content': content})
     except Exception as e:
         return jsonify({'error': str(e)})
@@ -219,7 +241,10 @@ def get_file(filename):
 def save_file():
     try:
         data = request.json
-        filepath = os.path.join(WORKSPACE_DIR, data['filepath'])
+
+        # ✅ এখন থেকে CURRENT_EDITOR_PATH বেইস হিসেবে ধরবে
+        base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
+        filepath = os.path.join(base_dir, data['filepath'])
         code = data['code']
         
         # ✅ Directory create করুন যদি না থাকে
@@ -227,12 +252,10 @@ def save_file():
         
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(code)
+
         return jsonify({'status': 'success'})
     except Exception as e:
-        return jsonify({'error': str(e)})
-
-
-#=================================
+        return jsonify({'error': str(e)})#=================================
 
 
 @app.route("/run_project")

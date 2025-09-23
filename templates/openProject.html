@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workspace Explorer</title>
     <style>
-        body {user-select: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;  margin: 0;  color: #ffffff; }
+        body {user-select: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;  margin: 0;  color: #1c1e21; }
         .container { width: 92%; padding: 12px; background: #fff;  border-radius: 8px;  margin: auto; }
         h1 { color: black; border-bottom: 1px solid #ddd; padding-bottom: 1rem; margin-top: 0; }
         ul { list-style: none; padding: 0; }
-        .item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; margin: 0.5rem 0; border-radius: 6px; color: black; background-color: #F9F9F9; transition: background-color 0.2s ease; }
+        .item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; margin: 0.5rem 0; border-radius: 6px; background-color: #F9F9F9; transition: background-color 0.2s ease; }
         .item:hover { background-color: #f0f2f5; }
         .item-name { font-weight: 500; }
-        .item-name .dir-tag { font-size: 0.8em; color: black; margin-left: 8px; }
+        .item-name .dir-tag { font-size: 0.8em; color: #65676b; margin-left: 8px; }
         .menu-btn { background: none; border: none; font-size: 1.5rem; line-height: 1; color: #65676b; padding: 4px 8px; border-radius: 50%; }
         .menu-btn:hover { background-color: #e4e6eb; }
         #contextMenu { position: fixed; display: none; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; padding: 0.5rem 0; }
@@ -20,7 +20,7 @@
         #contextMenu button:hover { background-color: #f0f2f5; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-overlay.active { display: flex; }
-        .modal {color: black; background: #fff; padding: 1.5rem; border-radius: 8px; width: 80%; max-width: 700px; max-height: 50vh; display: flex; flex-direction: column; }
+        .modal { background: #fff; padding: 1.5rem; border-radius: 8px; width: 80%; max-width: 700px; max-height: 50vh; display: flex; flex-direction: column; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-bottom: 1rem; }
         .output-content { background: #E8E8E8; color: #000000; padding: 1rem; margin: -10px; border-radius: 6px; white-space: pre; flex-grow: 1; overflow-y: auto; overflow-x: auto; font-family: "SF Mono", "Menlo", "Monaco", monospace; font-size: 0.9rem; }
         .status-success { color: #31a24c; font-weight: bold; }
@@ -36,236 +36,8 @@
         .confirm-yes { background-color: #fa383e; color: white; }
         .confirm-no { background-color: #e4e6eb; }
     </style>
-    
-    <style>
-        :root {
-            --bg: #1e1e1e;
-            --surface: #252526;
-            --muted: #9aa4b2;
-            --primary: #007acc;
-            --accent: #388e3c;
-            --warn: #f57c00;
-            --panel-border: #333;
-            --topbar: #2d2d2d;
-            --status-bg: #007acc;
-            --radius: 12px;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        /* reset & base */
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        htmll, bodyy { height: 100%; }
-        bodyy {
-            font-family: "Roboto", "Noto Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-            background: var(--bg);
-            color: #fff;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            touch-action: manipulation;
-        }
-
-        /* Main container */
-        .mobile-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
-            position: relative;
-        }
-
-        /* Top Action Bar - touch friendly */
-        .top-bar {
-            background: var(--topbar);
-            padding: calc(8px + var(--safe-top)) 12px 10px 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-            min-height: 64px;
-            border-bottom: 1px solid #444;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            position: relative;
-            z-index: 20;
-        }
-
-        /* hide scrollbar visually but allow scrolling */
-        .top-bar::-webkit-scrollbar { height: 6px; }
-        .top-bar::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
-
-        /* Action Buttons (larger targets for thumbs) */
-        .action-btn {
-            padding: 12px 14px;
-            background: var(--primary);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-            touch-action: manipulation;
-            flex-shrink: 0;
-            min-width: 56px;
-            height: 44px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-        }
-        .action-btn:active { transform: translateY(1px); }
-        .action-btn.secondary { background: #3a3a3a; }
-        .action-btn.success { background: var(--accent); }
-        .action-btn.warning { background: var(--warn); }
-
-        /* File info */
-        .file-info {
-            margin-left: auto;
-            font-size: 12px;
-            color: var(--muted);
-            padding: 0 8px;
-            flex-shrink: 0;
-            max-width: 40%;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        /* Editor area */
-        .editor-fullscreen {
-            flex: 1;
-            position: relative;
-            min-height: 0;
-            width: 100%;
-        }
-        #editor {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-        #editorPart{
-            display: none;
-        }
-
-        /* File manager (slide-in drawer) */
-        .file-manager {
-            position: fixed;
-            left: -110%;
-            top: 0;
-            width: 92%;
-            max-width: 420px;
-            height: 100%;
-            background: var(--surface);
-            z-index: 120;
-            transition: left .28s cubic-bezier(.22,.9,.36,1);
-            overflow-y: auto;
-            box-shadow: 2px 0 24px rgba(0,0,0,0.6);
-        }
-        .file-manager.open { left: 0; }
-
-        @media (max-width: 380px) {
-            .file-manager { width: 100%; max-width: 100%; }
-        }
-
-        .file-manager-header {
-            padding: calc(12px + var(--safe-top)) 14px 14px 14px;
-            background: var(--topbar);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #444;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-
-        .file-list { padding: 8px 0; }
-        .file-item {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--panel-border);
-            cursor: pointer;
-            word-break: break-all;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: background .12s;
-        }
-        .file-item:active { background: #333; }
-        .file-icon { font-size: 18px; width: 28px; text-align: center; }
-
-        /* overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.65);
-            z-index: 110;
-            display: none;
-        }
-
-        /* Status bar */
-        .status-bar {
-            padding: 10px 14px;
-            background: var(--status-bg);
-            font-size: 13px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: calc(10px + var(--safe-bottom));
-        }
-        .status-info { display: flex; gap: 12px; align-items: center; }
-
-        /* Floating action button */
-        .quick-actions { position: fixed; bottom: calc(22px + var(--safe-bottom)); right: 18px; z-index: 140; }
-        .fab {
-            width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none;
-            font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-        }
-        .fab:active { transform: scale(.96); }
-
-        /* Terminal panel */
-        .terminal-panel {
-            position: fixed;
-            bottom: -100%;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            background: #1e1e1e;
-            z-index: 130;
-            transition: bottom .3s ease;
-            border-top: 2px solid #007acc;
-        }
-        .terminal-panel.open { bottom: 0; }
-        .terminal-content {
-            height: 100%;
-            padding: 15px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: #00ff00;
-            background: #000;
-        }
-
-        @media (max-width: 480px) {
-            .top-bar { gap: 8px; padding: calc(6px + var(--safe-top)) 10px 8px 10px; min-height: 56px; }
-            .action-btn { padding: 10px 12px; height: 44px; font-size: 14px; min-width: 48px; }
-            .file-info { font-size: 11px; max-width: 50%; }
-        }
-    </style>
 </head>
 <body>
-<span id="projectView">
     <div class="container">
         <h1 style="text-align: center;">Projects</h1>
         <ul id="itemList">
@@ -287,7 +59,7 @@
     <div id="contextMenu">
         <button id="runBtn">▶ Run Project</button>
         <button id="deleteBtn">🗑 Delete</button>
-        <button class="btn" onclick="setTimeout(()=>{document.getElementById('editorPart').style.display = 'block'; document.getElementById('projectView').style.display = 'none'}, 300)">✏️ Edit</button>
+        <button class="editBtn">Editor</button>
 
     </div>
 
@@ -312,506 +84,6 @@
         </div>
     </div>
 
-</span>
-
-    <!-- editor part-->
-
-<span id="editorPart">
-    <!-- Overlay for modals -->
-    <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
-    
-    <!-- Slide-in File Manager -->
-    <div class="file-manager" id="file-manager">
-        <div class="file-manager-header">
-            <div class="file-manager-title">📁 Workspace Files</div>
-            <button class="action-btn secondary" onclick="closeFileManager()">✕ Close</button>
-        </div>
-        <div class="file-list" id="file-list">
-            <div style="padding: 20px; color: #aaa; text-align: center;">
-                <div>📂</div>
-                <div style="margin-top: 10px;">Loading files...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Terminal Panel -->
-    <div class="terminal-panel" id="terminal-panel">
-        <div class="terminal-content" id="terminal-content">
-            Terminal output will appear here...<br>
-            Build results and logs will be shown in this area.
-        </div>
-    </div>
-
-    <!-- Main Mobile Container -->
-    <div class="mobile-container">
-        <!-- Top Action Bar -->
-        <div class="top-bar">
-            <button class="action-btn secondary" onclick="toggleFileManager()">📁 Files</button>
-            <button class="action-btn" onclick="saveFile()">💾 Save</button>
-            <button class="action-btn success" onclick="buildProject()">🔨 Build</button>
-            <button class="action-btn warning" onclick="runProject()">▶️ Run</button>
-            <button class="action-btn secondary" onclick="toggleTerminal()">📟 Terminal</button>
-            
-            <div class="file-info" id="file-info">
-                No file selected
-            </div>
-        </div>
-        
-        <!-- Full Screen Editor -->
-        <div class="editor-fullscreen">
-            <div id="editor"></div>
-        </div>
-        
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div id="status-message">Ready - Open a file to start editing</div>
-            <div class="status-info">
-                <span id="line-info">Line: 1</span>
-                <span id="language-info">Text</span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Floating Action Button -->
-    <div class="quick-actions">
-        <button class="fab" onclick="showQuickActions()">⋮</button>
-    </div>
-
- </span>
-
- <!-- Monaco Editor with Fixed CDN -->
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
-<script>
-    // Monaco Editor Configuration
-    require.config({
-        paths: { 
-            'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' 
-        }
-    });
-
-    let editor;
-    let currentFile = null;
-
-    // Initialize Editor
-    window.addEventListener('load', function() {
-        require(['vs/editor/editor.main'], function() {
-            editor = monaco.editor.create(document.getElementById('editor'), {
-                value: `// Android IDE Mobile - Full Screen Editor
-// Tap [📁 Files] button to open file manager
-// Open a Kotlin/Java/XML file to start coding
-
-fun main() {
-    println("Hello from Android IDE!")
-}`,
-                language: 'kotlin',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                wordWrap: 'off', // ✅ Mobile-friendly word wrap
-                minimap: { enabled: false },
-                folding: true,
-                lineNumbers: 'on',
-                fontSize: 11,
-                lineHeight: 1.6,
-                mouseWheelZoom: true,
-                scrollbar: {
-                    verticalScrollbarSize: 6,
-                    horizontalScrollbarSize: 6
-                },
-                padding: { top: 10, bottom: 10 }
-            });
-
-            // Update cursor position in real-time
-            editor.onDidChangeCursorPosition(function(e) {
-                document.getElementById('line-info').textContent = 
-                    `Line: ${e.position.lineNumber}:${e.position.column}`;
-            });
-
-            // Handle mobile resize and orientation changes
-            window.addEventListener('resize', function() {
-                setTimeout(() => {
-                    editor.layout();
-                }, 100);
-            });
-        });
-    });
-
-    // Modal Management Functions
-    function closeAllModals() {
-        closeFileManager();
-        closeTerminal();
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    // File Manager Functions
-    function toggleFileManager() {
-        const fileManager = document.getElementById('file-manager');
-        const overlay = document.getElementById('overlay');
-        
-        closeTerminal(); // Close terminal if open
-        
-        fileManager.classList.toggle('open');
-        overlay.style.display = fileManager.classList.contains('open') ? 'block' : 'none';
-        
-        if (fileManager.classList.contains('open')) {
-            loadFiles();
-        }
-    }
-
-    function closeFileManager() {
-        document.getElementById('file-manager').classList.remove('open');
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    // Terminal Functions
-    function toggleTerminal() {
-        const terminal = document.getElementById('terminal-panel');
-        const overlay = document.getElementById('overlay');
-        
-        closeFileManager(); // Close file manager if open
-        
-        terminal.classList.toggle('open');
-        overlay.style.display = terminal.classList.contains('open') ? 'block' : 'none';
-    }
-
-    function closeTerminal() {
-        document.getElementById('terminal-panel').classList.remove('open');
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    function showTerminalOutput(content) {
-        document.getElementById('terminal-content').innerHTML = content;
-        toggleTerminal();
-    }
-
-    function clearTerminal() {
-        document.getElementById('terminal-content').innerHTML = 'Terminal cleared - Ready for new output';
-    }
-
-    // File Operations
-    async function loadFiles() {
-        try {
-            document.getElementById('file-list').innerHTML = 
-                '<div style="padding: 20px; color: #aaa; text-align: center;">Loading files...</div>';
-            
-            const response = await fetch('/api/files');
-            const files = await response.json();
-            
-            const fileList = document.getElementById('file-list');
-            fileList.innerHTML = '';
-            
-            if (!files || files.length === 0) {
-                fileList.innerHTML = `
-                    <div style="padding: 30px; text-align: center; color: #aaa;">
-                        <div style="font-size: 48px;">📁</div>
-                        <div style="margin-top: 15px;">No files found</div>
-                        <div style="font-size: 12px; margin-top: 10px;">Create a project first</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            files.forEach(file => {
-                const div = document.createElement('div');
-                div.className = 'file-item';
-                
-                const ext = file.split('.').pop();
-                const icon = getFileIcon(ext);
-                
-                div.innerHTML = `
-                    <span class="file-icon">${icon}</span>
-                    <span class="file-name">${file}</span>
-                `;
-                
-                div.onclick = () => {
-                    loadFile(file);
-                    closeFileManager();
-                };
-                
-                fileList.appendChild(div);
-            });
-        } catch (error) {
-            console.error('Error loading files:', error);
-            document.getElementById('file-list').innerHTML = 
-                '<div style="padding: 20px; color: red;">Error loading files. Check server connection.</div>';
-        }
-    }
-
-    function getFileIcon(ext) {
-        const icons = {
-            'kt': '📄', 'java': '📄', 'xml': '📋',
-            'gradle': '⚙️', 'txt': '📝', 'md': '📖',
-            'json': '🔧', 'yml': '⚙️', 'yaml': '⚙️',
-            'html': '🌐', 'css': '🎨', 'js': '📜',
-            'png': '🖼️', 'jpg': '🖼️', 'jpeg': '🖼️'
-        };
-        return icons[ext] || '📁';
-    }
-
-    async function loadFile(filename) {
-        try {
-            updateStatus(`Loading: ${filename}`);
-            
-            const response = await fetch('/api/files/' + encodeURIComponent(filename));
-            const data = await response.json();
-            
-            if (data.error) throw new Error(data.error);
-            
-            // Set content first
-            editor.setValue(data.content);
-            currentFile = filename;
-            
-            // Then set language with delay for proper syntax highlighting
-            setTimeout(() => {
-                const ext = filename.split('.').pop();
-                const lang = getLanguage(ext);
-                
-                const model = editor.getModel();
-                if (model) {
-                    monaco.editor.setModelLanguage(model, lang);
-                }
-                
-                document.getElementById('language-info').textContent = lang;
-            }, 50);
-            
-            document.getElementById('file-info').textContent = filename;
-            updateStatus(`Editing: ${filename}`);
-            
-        } catch (error) {
-            alert('Error loading file: ' + error.message);
-            updateStatus('Error loading file');
-        }
-    }
-
-    function getLanguage(ext) {
-        const languages = {
-            'kt': 'kotlin',
-            'java': 'java', 
-            'xml': 'xml',
-            'gradle': 'groovy',
-            'txt': 'plaintext',
-            'md': 'markdown',
-            'json': 'json',
-            'yml': 'yaml',
-            'yaml': 'yaml',
-            'html': 'html',
-            'css': 'css',
-            'js': 'javascript',
-            'properties': 'ini',
-            'gitignore': 'plaintext'
-        };
-        return languages[ext.toLowerCase()] || 'plaintext';
-    }
-
-    async function saveFile() {
-        if (!currentFile) {
-            alert('Please open a file first');
-            return;
-        }
-        
-        try {
-            const content = editor.getValue();
-            const response = await fetch('/api/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filepath: currentFile, code: content })
-            });
-            
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.error);
-            }
-            
-            updateStatus(`Saved: ${currentFile}`);
-            
-        } catch (error) {
-            alert('Save error: ' + error.message);
-        }
-    }
-
-    async function buildProject() {
-        if (!currentFile) {
-            alert('Please open a project file first');
-            return;
-        }
-        
-        try {
-            updateStatus('Building project...');
-            const response = await fetch('/api/build');
-            const result = await response.json();
-            
-            let output = '<div style="color: #ffffff; font-family: monospace;">';
-            output += '<div style="color: #ffff00;">📦 Build Output:</div>';
-            
-            if (result.output) {
-                output += '<div style="color: #cccccc; white-space: pre-wrap;">' + result.output + '</div>';
-            }
-            
-            if (result.error) {
-                output += '<div style="color: #ff6b6b; white-space: pre-wrap;">ERROR: ' + result.error + '</div>';
-            } else if (result.returncode === 0) {
-                output += '<div style="color: #51cf66;">✅ Build successful!</div>';
-            }
-            
-            output += '</div>';
-            
-            showTerminalOutput(output);
-            updateStatus('Build finished');
-            
-        } catch (error) {
-            alert('Build error: ' + error.message);
-            updateStatus('Build failed');
-        }
-    }
-
-    async function runProject() {
-        if (!currentFile) {
-            alert('Please open a project file first');
-            return;
-        }
-        
-        try {
-            updateStatus('Running project...');
-            const response = await fetch('/api/run');
-            const result = await response.json();
-            
-            let output = '<div style="color: #ffffff; font-family: monospace;">';
-            output += '<div style="color: #ffff00;">🚀 Run Output:</div>';
-            
-            if (result.output) {
-                output += '<div style="color: #cccccc; white-space: pre-wrap;">' + result.output + '</div>';
-            }
-            
-            if (result.error) {
-                output += '<div style="color: #ff6b6b; white-space: pre-wrap;">ERROR: ' + result.error + '</div>';
-            } else {
-                output += '<div style="color: #51cf66;">✅ ' + (result.message || 'App installed successfully') + '</div>';
-            }
-            
-            output += '</div>';
-            
-            showTerminalOutput(output);
-            updateStatus('Run completed');
-            
-        } catch (error) {
-            alert('Run error: ' + error.message);
-            updateStatus('Run failed');
-        }
-    }
-
-    // Quick Actions Menu
-    function showQuickActions() {
-        const action = prompt(`Quick Actions:
-1. New File
-2. Refresh Files
-3. Clear Terminal
-4. Project Info
-
-Enter choice (1-4):`);
-
-        if (action === '1') {
-            createNewFile();
-        } else if (action === '2') {
-            loadFiles();
-            alert('Files refreshed');
-        } else if (action === '3') {
-            clearTerminal();
-            alert('Terminal cleared');
-        } else if (action === '4') {
-            showProjectInfo();
-        }
-    }
-
-    function createNewFile() {
-        const filename = prompt('Enter filename (e.g., MainActivity.kt):');
-        if (filename) {
-            // Basic template based on file extension
-            const ext = filename.split('.').pop();
-            let template = '';
-            
-            if (ext === 'kt') {
-                template = `class ${filename.replace('.kt', '')} {\n    \n}`;
-            } else if (ext === 'java') {
-                template = `public class ${filename.replace('.java', '')} {\n    \n}`;
-            } else if (ext === 'xml') {
-                template = `<?xml version="1.0" encoding="utf-8"?>\n<LinearLayout>\n    \n</LinearLayout>`;
-            } else {
-                template = `// ${filename}\n\n`;
-            }
-            
-            editor.setValue(template);
-            currentFile = filename;
-            updateStatus('Created: ' + filename);
-        }
-    }
-
-    function showProjectInfo() {
-        const info = `
-Project: ${currentFile || 'No file open'}
-Files: ${document.getElementById('file-list').children.length}
-Editor: Monaco (VS Code)
-Server: Flask + Termux
-        `.trim();
-        
-        alert(info);
-    }
-
-    function updateStatus(message) {
-        document.getElementById('status-message').textContent = message;
-    }
-
-    // Android-specific handlers
-    window.addEventListener('popstate', function() {
-        closeAllModals();
-    });
-
-    // Prevent accidental page refresh
-    window.addEventListener('beforeunload', function(e) {
-        if (editor.getValue() !== editor.getOriginalOptions().value) {
-            e.preventDefault();
-            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        }
-    });
-
-    // Keyboard shortcuts (for devices with physical keyboards)
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey || e.metaKey) {
-            switch(e.key) {
-                case 's':
-                    e.preventDefault();
-                    saveFile();
-                    break;
-                case 'b':
-                    e.preventDefault();
-                    buildProject();
-                    break;
-                case 'r':
-                    e.preventDefault();
-                    runProject();
-                    break;
-            }
-        }
-    });
-
-    // Touch gesture for quick access (swipe from left edge)
-    let touchStartX = 0;
-    document.addEventListener('touchstart', function(e) {
-        touchStartX = e.touches[0].clientX;
-    });
-
-    document.addEventListener('touchend', function(e) {
-        const touchEndX = e.changedTouches[0].clientX;
-        const diff = touchEndX - touchStartX;
-        
-        // Swipe from left edge to open file manager
-        if (touchStartX < 50 && diff > 100) {
-            toggleFileManager();
-        }
-    });
-
-    // Initialize status
-    updateStatus('Ready - Open file manager to start coding');
-</script>
     <script>
         const contextMenu = document.getElementById('contextMenu');
         const runBtn = document.getElementById('runBtn');
@@ -823,6 +95,34 @@ Server: Flask + Termux
         
         let selectedItemPath = null;
         let confirmResolve = null;
+
+        const editBtn = document.querySelector('.editBtn');
+
+editBtn.addEventListener('click', async () => {
+    if (!selectedItemPath) return;
+
+    try {
+        // ✅ সার্ভারে পাঠাও সিলেক্টেড path
+        const res = await fetch("/set_editor_path", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ path: selectedItemPath })
+        });
+
+        const result = await res.json();
+        if (result.status === "ok") {
+            // ✅ Editor এ নিয়ে যাও
+            window.location.href = "/editor";
+        } else {
+            alert("Error: " + result.message);
+        }
+    } catch (error) {
+        alert("An error occurred: " + error);
+    }
+});
+
+
+
 
         function showContextMenu(event, button) {
             event.preventDefault();
@@ -933,9 +233,7 @@ Server: Flask + Termux
             };
         });
     </script>
-    
 </body>
 </html>
-
 
 
