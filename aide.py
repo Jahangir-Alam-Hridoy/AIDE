@@ -200,27 +200,32 @@ def ide():
     return render_template('editor.html')
 
 # ✅ নতুন API - Files list (Fixed)
+def build_tree(path):
+    tree = {}
+    try:
+        with os.scandir(path) as it:
+            for entry in it:
+                if entry.is_dir():
+                    tree[entry.name] = build_tree(entry.path)
+                elif entry.is_file() and entry.name.endswith(('.kt', '.java', '.xml', '.gradle', '.txt')):
+                    tree[entry.name] = None  # ফাইলের জন্য None বা ফাইল মেটাডেটা রাখতে পারো
+    except PermissionError:
+        pass
+    return tree
+
 @app.route('/api/files')
 def list_files():
     try:
-        # ✅ এখন থেকে সব লিস্ট CURRENT_EDITOR_PATH এর ভেতর থেকে হবে
         base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
 
-        files = []
         if not os.path.exists(base_dir):
-            return jsonify([])
+            return jsonify({'files': {}, 'base': os.path.basename(base_dir)})
 
-        for root, dirs, filenames in os.walk(base_dir):
-            for file in filenames:
-                if any(file.endswith(ext) for ext in ['.kt', '.java', '.xml', '.gradle', '.txt']):
-                    full_path = os.path.relpath(os.path.join(root, file), base_dir)
-                    files.append(full_path)
+        file_tree = build_tree(base_dir)
 
-        return jsonify({'files': files, 'base': os.path.basename(base_dir)})
+        return jsonify({'files': file_tree, 'base': os.path.basename(base_dir)})
     except Exception as e:
-        return jsonify({'error': str(e)})
-
-# ✅ নতুন API - Get file content (Fixed)
+        return jsonify({'error': str(e)})# ✅ নতুন API - Get file content (Fixed)
 @app.route('/api/files/<path:filename>')
 def get_file(filename):
     try:

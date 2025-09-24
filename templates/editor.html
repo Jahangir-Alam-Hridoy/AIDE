@@ -106,6 +106,60 @@
         }
 
         /* File manager (slide-in drawer) */
+        /* File tree root UL */
+.file-list ul {
+    list-style: none;          /* remove bullets */
+    padding-left: 10px;        /* base indentation */
+    margin: 0;
+}
+
+/* Nested UL */
+.file-list ul ul {
+    padding-left: 15px;        /* nested indentation */
+    display: none;             /* hide child by default */
+}
+
+/* Folder styling */
+.folder {
+    font-weight: bold;
+    color: #00bfff;           /* blue-ish for folders */
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Folder hover */
+.folder:hover {
+    color: #1e90ff;
+}
+
+/* File styling */
+.file {
+    color: #ffffff;           /* normal file color */
+    cursor: pointer;
+    user-select: none;
+}
+
+/* File hover */
+.file:hover {
+    color: #00ff99;
+}
+
+/* Optional icons using pseudo-elements */
+.folder::before {
+    content: "📁 ";
+}
+.file::before {
+    content: "📄 ";
+}
+
+/* Add small spacing between items */
+.file-list li {
+    margin: 3px 0;
+}
+
+
+
+
         .file-manager {
             position: fixed;
             left: -110%;
@@ -376,66 +430,133 @@ fun main() {
         document.getElementById('terminal-panel').classList.remove('open');
         document.getElementById('overlay').style.display = 'none';
     }
-
+/*
     function showTerminalOutput(content) {
         document.getElementById('terminal-content').innerHTML = content;
-        toggleTerminal();
+        //toggleTerminal();
     }
+    */
+    function showTerminalOutput(content) {
+    const terminal = document.getElementById('terminal-panel');
+    const overlay = document.getElementById('overlay');
+
+    // শুধুমাত্র terminal খোলা না থাকলে open কর
+    if (!terminal.classList.contains('open')) {
+        terminal.classList.add('open');
+        overlay.style.display = 'block';
+    }
+
+    // content update করো
+    document.getElementById('terminal-content').innerHTML = content;
+
+    // scroll সর্বদা নিচে
+    document.getElementById('terminal-content').scrollTop =
+        document.getElementById('terminal-content').scrollHeight;
+}
+
+
+
+
 
     function clearTerminal() {
         document.getElementById('terminal-content').innerHTML = 'Terminal cleared - Ready for new output';
     }
 
     // File Operations
-    async function loadFiles() {
-        try {
-            document.getElementById('file-list').innerHTML = 
-                '<div style="padding: 20px; color: #aaa; text-align: center;">Loading files...</div>';
-            
-            const response = await fetch('/api/files');
-            //const files = await response.json();
-            const { files, base } = await response.json();
-            document.getElementById('fileManagerTitle').textContent = "📂 " + base;
-            
-            const fileList = document.getElementById('file-list');
-            fileList.innerHTML = '';
-            
-            if (!files || files.length === 0) {
-                fileList.innerHTML = `
-                    <div style="padding: 30px; text-align: center; color: #aaa;">
-                        <div style="font-size: 48px;">📁</div>
-                        <div style="margin-top: 15px;">No files found</div>
-                        <div style="font-size: 12px; margin-top: 10px;">Create a project first</div>
-                    </div>
-                `;
-                return;
-            }
+// File Operations - Fixed for nested directories
+async function loadFiles() {
+    try {
+        const fileList = document.getElementById('file-list');
+        fileList.innerHTML = '<div style="padding: 20px; color: #aaa; text-align: center;">Loading files...</div>';
 
-            files.forEach(file => {
-                const div = document.createElement('div');
-                div.className = 'file-item';
-                
-                const ext = getFileExtension(file);
-                const icon = getFileIcon(ext);
-                
-                div.innerHTML = `
-                    <span class="file-icon">${icon}</span>
-                    <span class="file-name">${file}</span>
-                `;
-                
-                div.onclick = () => {
-                    loadFile(file);
-                    closeFileManager();
-                };
-                
-                fileList.appendChild(div);
-            });
-        } catch (error) {
-            console.error('Error loading files:', error);
-            document.getElementById('file-list').innerHTML = 
-                '<div style="padding: 20px; color: red;">Error loading files. Check server connection.</div>';
+        const response = await fetch('/api/files');
+        const { files, base } = await response.json();
+        document.getElementById('fileManagerTitle').textContent = "📂 " + base;
+
+        fileList.innerHTML = ''; // clear previous
+
+        if (!files || Object.keys(files).length === 0) {
+            fileList.innerHTML = `
+                <div style="padding: 30px; text-align: center; color: #aaa;">
+                    <div style="font-size: 48px;">📁</div>
+                    <div style="margin-top: 15px;">No files found</div>
+                    <div style="font-size: 12px; margin-top: 10px;">Create a project first</div>
+                </div>
+            `;
+            return;
         }
+
+        const ul = document.createElement('ul');
+        ul.style.listStyle = 'none';
+        ul.style.paddingLeft = '10px';
+        fileList.appendChild(ul);
+
+        // Recursive function to build tree
+        function buildTree(node, obj) {
+            Object.keys(obj).forEach(key => {
+                const li = document.createElement('li');
+                const span = document.createElement('span');
+                span.textContent = key;
+                span.dataset.name = key;
+
+                if (obj[key] && typeof obj[key] === 'object') {
+                    // folder
+                    span.classList.add('folder');
+                    span.style.cursor = 'pointer';
+                    li.appendChild(span);
+
+                    const childUl = document.createElement('ul');
+                    childUl.style.display = 'none';
+                    childUl.style.listStyle = 'none';
+                    childUl.style.paddingLeft = '15px';
+                    li.appendChild(childUl);
+
+                    // ✅ stop propagation so nested folders don't interfere
+                    span.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        childUl.style.display = childUl.style.display === 'none' ? 'block' : 'none';
+                    });
+
+                    buildTree(childUl, obj[key]);
+                } else {
+                    // file
+                    span.classList.add('file');
+                    span.style.cursor = 'pointer';
+
+                    // ✅ stop propagation for file clicks
+                    span.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        loadFile(getFullPath(span));
+                        closeFileManager();
+                    });
+
+                    li.appendChild(span);
+                }
+
+                node.appendChild(li);
+            });
+        }
+
+        // Correctly get full path for nested files
+        function getFullPath(span) {
+            const names = [];
+            let el = span;
+            while (el && el.tagName === 'SPAN') {
+                names.unshift(el.dataset.name);
+                const parentLi = el.closest('li').parentElement.closest('li');
+                el = parentLi ? parentLi.querySelector('span') : null;
+            }
+            return names.join('/');
+        }
+
+        buildTree(ul, files);
+
+    } catch (error) {
+        console.error('Error loading files:', error);
+        document.getElementById('file-list').innerHTML =
+            '<div style="padding: 20px; color: red;">Error loading files. Check server connection.</div>';
     }
+} 
 
     // NEW CODE - এটা বসান
 function getFileExtension(file) {
@@ -602,6 +723,7 @@ buildBtn.addEventListener('click', () => {
         updateStatus('Build failed');
         evtSource.close();
     };
+
 });
 
 
