@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from flask import Response, stream_with_context
@@ -314,51 +315,71 @@ def build_project():
 
 
 #=================================
-
-
 @app.route("/run_project")
 def run_project():
-    project_path = request.args.get("path")
+    base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
 
-    if not project_path or not os.path.abspath(project_path).startswith(os.path.abspath(WORKSPACE_DIR)) or not os.path.isdir(project_path):
+    project_path = request.args.get("path")
+    if not project_path:
+        return Response("No project path provided", status=400)
+
+    # Absolute path
+    abs_path = os.path.abspath(os.path.join(base_dir, project_path))
+
+    # Base dir validation
+    if not abs_path.startswith(os.path.abspath(base_dir)):
         return Response("Invalid or unauthorized project path", status=400)
+
+    # যদি path ফাইল হয়, parent directory নাও
+    if os.path.isfile(abs_path):
+        abs_path = os.path.dirname(abs_path)
+
+    # নিরাপদভাবে directory check
+    if not os.path.isdir(abs_path):
+        return Response("Project path is not a directory", status=400)
+
+    def safe_convert(text: str) -> str:
+        try:
+            return conv.convert(text, full=False)
+        except Exception as e:
+            return f"<span style='color:red'>[conv error] {str(e)}</span>"
 
     def generate_output():
         try:
             process = subprocess.Popen(
                 [RUNAPK_CMD],
-                cwd=project_path,
+                cwd=abs_path,   # ✅ এখানে use করা হচ্ছে সংশোধিত abs_path
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1
             )
 
-            line_num = 0  # সিরিয়াল নাম্বার কাউন্টার
-
-            for line in iter(process.stdout.readline, ""):
-                line_num += 1
-                # সিরিয়াল নাম্বার prepend করা হচ্ছে
+            for line_num, line in enumerate(iter(process.stdout.readline, ""), start=1):
                 numbered_line = f"\033[1;32m{line_num:>4}:\033[0m {line.rstrip()}"
-                html_line = conv.convert(numbered_line, full=False)
+                html_line = safe_convert(numbered_line)
                 yield f"data: {html_line}\n\n"
+                time.sleep(0.05)
 
             process.stdout.close()
             return_code = process.wait()
 
             if return_code == 0:
-                yield f"data: {conv.convert('✅ Build completed successfully! 🎉', full=False)}\n\n"
+                yield f"data: {safe_convert('✅ Build completed successfully! 🎉')}\n\n"
             else:
-                yield f"data: {conv.convert(f'❌ Build failed with exit code {return_code}', full=False)}\n\n"
+                yield f"data: {safe_convert(f'❌ Build failed with exit code {return_code}')}\n\n"
 
         except FileNotFoundError:
-            yield f"data: {conv.convert(f'❌ Error: The command {RUNAPK_CMD} was not found.', full=False)}\n\n"
+            yield f"data: {safe_convert(f'❌ Error: The command {RUNAPK_CMD} was not found.')}\n\n"
         except Exception as e:
-            yield f"data: {conv.convert(f'❌ Error: {str(e)}', full=False)}\n\n"
+            yield f"data: {safe_convert(f'❌ Unexpected Error: {str(e)}')}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
 
-        yield "data: [DONE]\n\n"
-
-    return Response(stream_with_context(generate_output()), mimetype="text/event-stream")
+    response = Response(stream_with_context(generate_output()), mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+    return response
 
 
 @app.route('/git_clone', methods=['GET','POST'])

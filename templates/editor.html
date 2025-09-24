@@ -249,7 +249,7 @@
         <div class="top-bar">
             <button class="action-btn secondary" onclick="toggleFileManager()">☰</button>
             <button class="action-btn" onclick="saveFile()">💾 Save</button>
-            <button class="action-btn success" onclick="buildProject()">🔨 Build</button>
+            <button class="action-btn success" id="buildBtn">🔨 Build</button>
             <button class="action-btn warning" onclick="runProject()">▶️ Run</button>
             <button class="action-btn secondary" onclick="toggleTerminal()">📟 Terminal</button>
             
@@ -558,7 +558,56 @@ function getLanguage(ext, filename) {
             alert('Save error: ' + error.message);
         }
     }
+    
+    
+    const buildBtn = document.getElementById('buildBtn');
+buildBtn.addEventListener('click', () => {
+    if (!currentFile) {
+        alert('Please open a project file first');
+        return;
+    }
 
+    updateStatus('Building project...');
+
+    // output কে শুরুতেই তৈরি করো
+    let output = '<div style="color: #ffffff; font-family: monospace;">';
+    output += '<div style="color: #ffff00;">📦 Build Output:</div>';
+    output += "<p>Starting build process...</p>";
+
+    // প্রথমেই দেখিয়ে দাও
+    showTerminalOutput(output);
+
+    const evtSource = new EventSource(`/run_project?path=${encodeURIComponent(currentFile)}`);
+
+   evtSource.onmessage = function(event) {
+    if (event.data === "[DONE]") {
+        evtSource.close();
+        updateStatus('Build finished');
+        return;
+    }
+
+    if (event.data.includes("✅ Build completed")) {
+        output += '<p class="status-success">✅ Build Successful</p>';
+    } else if (event.data.includes("❌ Build failed")) {
+        output += '<p class="status-error">❌ Build Failed</p>';
+    } else {
+        output += '<p>' + event.data + '</p>';
+    }
+
+    showTerminalOutput(output);
+};
+    evtSource.onerror = function() {
+        output += '<p class="status-error">Connection Error</p>';
+        showTerminalOutput(output);
+        updateStatus('Build failed');
+        evtSource.close();
+    };
+});
+
+
+
+
+    /*
     async function buildProject() {
         if (!currentFile) {
             alert('Please open a project file first');
@@ -593,6 +642,7 @@ function getLanguage(ext, filename) {
             updateStatus('Build failed');
         }
     }
+    */
 
     async function runProject() {
         if (!currentFile) {
