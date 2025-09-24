@@ -68,7 +68,7 @@
         /* Action Buttons (larger targets for thumbs) */
         .action-btn {
             padding: 12px 14px;
-            background: var(--primary);
+            background: none;
             border: none;
             border-radius: 10px;
             color: white;
@@ -82,11 +82,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
         }
         .action-btn:active { transform: translateY(1px); }
-        .action-btn.secondary { background: none;box-shadow: none; font-size: 22px; }
-        .action-btn.success { background: var(--accent); }
+        .action-btn.success{font-size: 20px;}
+        .action-btn.secondary{font-size:20px;font-weight: bold;}
         .action-btn.warning { background: var(--warn); }
 
 
@@ -206,17 +205,6 @@
         .file-item:active { background: #333; }
         .file-icon { font-size: 18px; width: 28px; text-align: center; }
 
-        /* overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.65);
-            z-index: 110;
-            display: none;
-        }
 
         /* Status bar */
         .status-bar {
@@ -244,13 +232,13 @@
         /* Terminal panel */
         .terminal-panel {
             position: fixed;
-            bottom: -100%;
+            bottom: -93.6%;
             left: 0;
             width: 100%;
-            height: 60%;
+            height: 100%;
             background: #1e1e1e;
             z-index: 130;
-            transition: bottom .3s ease;
+            transition: bottom .1s ease;
             border-top: 2px solid #007acc;
         }
         .terminal-panel.open { bottom: 0; }
@@ -258,6 +246,7 @@
             height: 100%;
             padding: 15px;
             overflow-y: auto;
+            wordWrap: pre;
             font-family: 'Courier New', monospace;
             font-size: 12px;
             color: #00ff00;
@@ -269,6 +258,7 @@
             .action-btn { padding: 10px 12px; height: 44px; font-size: 14px; min-width: 48px; }
             
         }
+        
     </style>
 </head>
 <body>
@@ -303,9 +293,7 @@
         <div class="top-bar">
             <button class="action-btn secondary" onclick="toggleFileManager()">☰</button>
             <button class="action-btn" onclick="saveFile()">💾 Save</button>
-            <button class="action-btn success" id="buildBtn">🔨 Build</button>
-            <button class="action-btn warning" onclick="runProject()">▶️ Run</button>
-            <button class="action-btn secondary" onclick="toggleTerminal()">📟 Terminal</button>
+            <button class="action-btn success" id="buildBtn">▶️</button>
             
         </div>
         
@@ -345,13 +333,14 @@
     // Initialize Editor
     window.addEventListener('load', function() {
         require(['vs/editor/editor.main'], function() {
-          let initialContent = `// Android IDE Mobile - Full Screen Editor
-// Tap [📁 Files] button to open file manager
-// Open a Kotlin/Java/XML file to start coding
+          let initialContent = `
 
-fun main() {
-    println("Hello from Android IDE!")
-}`;
+
+
+
+      Open the left drawer for file tree
+      Swipe up for build output
+          `;
 
             editor = monaco.editor.create(document.getElementById('editor'), {
                 value: initialContent,
@@ -392,18 +381,15 @@ fun main() {
     function closeAllModals() {
         closeFileManager();
         closeTerminal();
-        document.getElementById('overlay').style.display = 'none';
     }
 
     // File Manager Functions
     function toggleFileManager() {
         const fileManager = document.getElementById('file-manager');
-        const overlay = document.getElementById('overlay');
         
         closeTerminal(); // Close terminal if open
         
         fileManager.classList.toggle('open');
-        overlay.style.display = fileManager.classList.contains('open') ? 'block' : 'none';
         
         if (fileManager.classList.contains('open')) {
             loadFiles();
@@ -412,23 +398,20 @@ fun main() {
 
     function closeFileManager() {
         document.getElementById('file-manager').classList.remove('open');
-        document.getElementById('overlay').style.display = 'none';
     }
-
+/*
     // Terminal Functions
     function toggleTerminal() {
         const terminal = document.getElementById('terminal-panel');
-        const overlay = document.getElementById('overlay');
         
         closeFileManager(); // Close file manager if open
         
         terminal.classList.toggle('open');
-        overlay.style.display = terminal.classList.contains('open') ? 'block' : 'none';
     }
+    */
 
     function closeTerminal() {
         document.getElementById('terminal-panel').classList.remove('open');
-        document.getElementById('overlay').style.display = 'none';
     }
 /*
     function showTerminalOutput(content) {
@@ -438,12 +421,10 @@ fun main() {
     */
     function showTerminalOutput(content) {
     const terminal = document.getElementById('terminal-panel');
-    const overlay = document.getElementById('overlay');
 
     // শুধুমাত্র terminal খোলা না থাকলে open কর
     if (!terminal.classList.contains('open')) {
         terminal.classList.add('open');
-        overlay.style.display = 'block';
     }
 
     // content update করো
@@ -727,40 +708,7 @@ buildBtn.addEventListener('click', () => {
 });
 
 
-    async function runProject() {
-        if (!currentFile) {
-            alert('Please open a project file first');
-            return;
-        }
-        
-        try {
-            updateStatus('Running project...');
-            const response = await fetch('/api/run');
-            const result = await response.json();
-            
-            let output = '<div style="color: #ffffff; font-family: monospace;">';
-            output += '<div style="color: #ffff00;">🚀 Run Output:</div>';
-            
-            if (result.output) {
-                output += '<div style="color: #cccccc; white-space: pre-wrap;">' + result.output + '</div>';
-            }
-            
-            if (result.error) {
-                output += '<div style="color: #ff6b6b; white-space: pre-wrap;">ERROR: ' + result.error + '</div>';
-            } else {
-                output += '<div style="color: #51cf66;">✅ ' + (result.message || 'App installed successfully') + '</div>';
-            }
-            
-            output += '</div>';
-            
-            showTerminalOutput(output);
-            updateStatus('Run completed');
-            
-        } catch (error) {
-            alert('Run error: ' + error.message);
-            updateStatus('Run failed');
-        }
-    }
+  
 
     // Quick Actions Menu
     function showQuickActions() {
@@ -843,13 +791,9 @@ window.addEventListener('beforeunload', function(e) {
                     e.preventDefault();
                     saveFile();
                     break;
-                case 'b':
-                    e.preventDefault();
-                    buildProject();
-                    break;
                 case 'r':
                     e.preventDefault();
-                    runProject();
+                    buildProject();
                     break;
             }
         }
@@ -873,6 +817,64 @@ window.addEventListener('beforeunload', function(e) {
 
     // Initialize status
     updateStatus('Ready - Open file manager to start coding');
-</script></body>
+</script>
+<script>
+        const box = document.getElementById('terminal-panel');
+        let isDragging = false;
+        let startY;
+        let startBottom;
+
+        // মাউস ইভেন্ট
+        box.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startY = e.clientY;
+            startBottom = parseInt(getComputedStyle(box).bottom);
+            box.classList.add('grabbing');
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let dy = startY - e.clientY;
+            let newBottom = startBottom + dy;
+
+            // বাউন্ড চেক (বক্স পুরো স্ক্রিনের ভিতরে থাকবে)
+            const maxBottom = window.innerHeight - box.offsetHeight;
+            const minBottom = -box.offsetHeight + 50; // নিচ থেকে কিছুটা দেখা যাবে
+            if (newBottom > maxBottom) newBottom = maxBottom;
+            if (newBottom < minBottom) newBottom = minBottom;
+
+            box.style.bottom = newBottom + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            box.classList.remove('grabbing');
+        });
+
+        // টাচ ইভেন্ট (মোবাইলের জন্য)
+        box.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startY = e.touches[0].clientY;
+            startBottom = parseInt(getComputedStyle(box).bottom);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            let dy = startY - e.touches[0].clientY;
+            let newBottom = startBottom + dy;
+
+            const maxBottom = window.innerHeight - box.offsetHeight;
+            const minBottom = -box.offsetHeight + 50;
+            if (newBottom > maxBottom) newBottom = maxBottom;
+            if (newBottom < minBottom) newBottom = minBottom;
+
+            box.style.bottom = newBottom + 'px';
+        }, { passive: false });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    </script>
+</body>
 </html>
 

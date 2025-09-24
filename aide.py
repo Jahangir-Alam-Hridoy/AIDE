@@ -263,61 +263,7 @@ def save_file():
     except Exception as e:
         return jsonify({'error': str(e)})
 
-
-@app.route('/api/run', methods=['GET','POST'])
-def install_apk():
-    try:
-        
-        # ✅ Find APK file
-        base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
-        apk_path = os.path.join(base_dir, 'app/build/outputs/apk/debug/app-debug.apk')
-        
-        if os.path.exists(apk_path):
-            # ✅ Install APK
-            result = subprocess.run(
-                ['termux-open', apk_path],
-                capture_output=True,
-                text=True
-            )
-            return jsonify({
-                'message': 'APK installed successfully',
-                'output': result.stdout,
-                'error': result.stderr
-            })
-        else:
-            return jsonify({'error': 'APK not found. Build the project first.'})
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-
-@app.route('/api/build')
-def build_project():
-    try:
-        # ✅ Check if gradlew exists
-        base_dir = CURRENT_EDITOR_PATH if CURRENT_EDITOR_PATH else WORKSPACE_DIR
-        gradlew_path = os.path.join(base_dir, 'gradlew')
-        if not os.path.exists(gradlew_path):
-            return jsonify({'error': 'gradlew not found. Create an Android project first.'})
-        
-        # ✅ Make gradlew executable
-        os.chmod(gradlew_path, 0o755)
-        
-        result = subprocess.run(
-            ['./gradlew', 'assembleDebug'], 
-            cwd=base_dir, 
-            capture_output=True, 
-            text=True,
-            timeout=300  # 5 minutes timeout
-        )
-        return jsonify({
-            'output': result.stdout,
-            'error': result.stderr,
-            'returncode': result.returncode
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-
+    
 
 #=================================
 @app.route("/run_project")
