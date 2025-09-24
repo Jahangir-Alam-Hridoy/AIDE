@@ -605,45 +605,6 @@ buildBtn.addEventListener('click', () => {
 });
 
 
-
-
-    /*
-    async function buildProject() {
-        if (!currentFile) {
-            alert('Please open a project file first');
-            return;
-        }
-        
-        try {
-            updateStatus('Building project...');
-            const response = await fetch('/api/build');
-            const result = await response.json();
-            
-            let output = '<div style="color: #ffffff; font-family: monospace;">';
-            output += '<div style="color: #ffff00;">📦 Build Output:</div>';
-            
-            if (result.output) {
-                output += '<div style="color: #cccccc; white-space: pre-wrap;">' + result.output + '</div>';
-            }
-            
-            if (result.error) {
-                output += '<div style="color: #ff6b6b; white-space: pre-wrap;">ERROR: ' + result.error + '</div>';
-            } else if (result.returncode === 0) {
-                output += '<div style="color: #51cf66;">✅ Build successful!</div>';
-            }
-            
-            output += '</div>';
-            
-            showTerminalOutput(output);
-            updateStatus('Build finished');
-            
-        } catch (error) {
-            alert('Build error: ' + error.message);
-            updateStatus('Build failed');
-        }
-    }
-    */
-
     async function runProject() {
         if (!currentFile) {
             alert('Please open a project file first');
@@ -745,15 +706,6 @@ Server: Flask + Termux
         closeAllModals();
     });
 
-/*
-    // Prevent accidental page refresh
-    window.addEventListener('beforeunload', function(e) {
-        if (editor.getValue() !== editor.getOriginalOptions().value) {
-            e.preventDefault();
-            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        }
-    });
-    */
 window.addEventListener('beforeunload', function(e) {
     if (editor.getValue() !== initialContent) {
         e.preventDefault();
