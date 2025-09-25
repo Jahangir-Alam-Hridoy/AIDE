@@ -57,9 +57,7 @@
     </div>
 
     <div id="contextMenu">
-        <button id="runBtn">▶ Run Project</button>
         <button id="deleteBtn">🗑 Delete</button>
-        <button class="editBtn">Editor</button>
 
     </div>
 
@@ -86,7 +84,6 @@
 
     <script>
         const contextMenu = document.getElementById('contextMenu');
-        const runBtn = document.getElementById('runBtn');
         const deleteBtn = document.getElementById('deleteBtn');
         const confirmModal = document.getElementById('confirmModal');
         const confirmMessage = document.getElementById('confirmMessage');
@@ -95,32 +92,7 @@
         
         let selectedItemPath = null;
         let confirmResolve = null;
-/*
-        const editBtn = document.querySelector('.editBtn');
 
-editBtn.addEventListener('click', async () => {
-    if (!selectedItemPath) return;
-
-    try {
-        // ✅ সার্ভারে পাঠাও সিলেক্টেড path
-        const res = await fetch("/set_editor_path", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ path: selectedItemPath })
-        });
-
-        const result = await res.json();
-        if (result.status === "ok") {
-            // ✅ Editor এ নিয়ে যাও
-            window.location.href = "/editor";
-        } else {
-            alert("Error: " + result.message);
-        }
-    } catch (error) {
-        alert("An error occurred: " + error);
-    }
-});
-        */
 // প্রতিটি আইটেমে ক্লিক করলে সরাসরি এডিটর খুলবে
 document.querySelectorAll('.item').forEach(item => {
     item.addEventListener('click', async (e) => {
@@ -229,37 +201,7 @@ document.querySelectorAll('.item').forEach(item => {
             }
         });
 
-        runBtn.addEventListener('click', () => {
-            if (!selectedItemPath) return;
-            showModal("outputModal");
-            const outputContent = document.getElementById("outputContent");
-            const outputTitle = document.getElementById("outputTitle");
-            outputContent.textContent = "Starting build process...\\n";
-            outputTitle.textContent = "Building Project";
-
-            const evtSource = new EventSource(`/run_project?path=${encodeURIComponent(selectedItemPath)}`);
-            
-            evtSource.onmessage = function(event) {
-                if (event.data === "[DONE]") {
-                    evtSource.close();
-                    return;
-                }
-                if (event.data.includes("✅ Build completed")) {
-                    outputTitle.innerHTML = '<span class="status-success">Build Successful</span>';
-                    evtSource.close();
-                } else if (event.data.includes("❌ Build failed")) {
-                    outputTitle.innerHTML = '<span class="status-error">Build Failed</span>';
-                    evtSource.close();
-    }
-                    outputContent.innerHTML += event.data + '<br/>';  // <-- changed here
-                    outputContent.scrollTop = outputContent.scrollHeight;
-                };
-
-            evtSource.onerror = function() {
-                outputTitle.innerHTML = '<span class="status-error">Connection Error</span>';
-                evtSource.close();
-            };
-        });
+        
     </script>
 </body>
 </html>
