@@ -95,7 +95,7 @@
         
         let selectedItemPath = null;
         let confirmResolve = null;
-
+/*
         const editBtn = document.querySelector('.editBtn');
 
 editBtn.addEventListener('click', async () => {
@@ -119,6 +119,34 @@ editBtn.addEventListener('click', async () => {
     } catch (error) {
         alert("An error occurred: " + error);
     }
+});
+        */
+// প্রতিটি আইটেমে ক্লিক করলে সরাসরি এডিটর খুলবে
+document.querySelectorAll('.item').forEach(item => {
+    item.addEventListener('click', async (e) => {
+        // যদি থ্রি-ডট মেনুতে ক্লিক করা হয়, তাহলে এডিটর না খোলে
+        if (e.target.closest('.menu-btn')) return;
+
+        const path = decodeURIComponent(item.dataset.path);
+        if (!path) return;
+
+        try {
+            const res = await fetch("/set_editor_path", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ path })
+            });
+
+            const result = await res.json();
+            if (result.status === "ok") {
+                window.location.href = "/editor";
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            alert("An error occurred: " + error);
+        }
+    });
 });
 
 

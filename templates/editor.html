@@ -7,7 +7,7 @@
     
     <style>
         :root {
-            --bg: #1e1e1e;
+ 
             --surface: #252526;
             --muted: #9aa4b2;
             --primary: #007acc;
@@ -51,11 +51,9 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-shrink: 0;
+            
             min-height: 64px;
             border-bottom: 1px solid #444;
-            overflow-x: auto;
-            white-space: nowrap;
             -webkit-overflow-scrolling: touch;
             position: relative;
             z-index: 20;
@@ -73,7 +71,6 @@
             border-radius: 10px;
             color: white;
             font-size: 15px;
-            cursor: pointer;
             touch-action: manipulation;
             flex-shrink: 0;
             min-width: 56px;
@@ -83,10 +80,59 @@
             justify-content: center;
             gap: 8px;
         }
-        .action-btn:active { transform: translateY(1px); }
+        
         .action-btn.success{font-size: 20px;}
-        .action-btn.secondary{font-size:20px;font-weight: bold;}
+        .action-btn.secondary{
+            font-size:20px;
+            font-weight: bold;
+            
+        }
         .action-btn.warning { background: var(--warn); }
+        
+        #buildBtn {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50px;
+            background: none; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            float: right;
+            right: 0;
+            margin-right: 70px;
+        }
+      
+
+/* টাচ/ক্লিক অ্যানিমেশন */
+#buildBtn:active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3); /* চাপ দিলে গাঢ় হবে */
+  animation: fadeTouch 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes fadeTouch {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+        #buildBtn::before {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border-left: 12px solid #2ecc71;   /* প্লে আইকনের সাদা ত্রিভুজ */
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 3px;
+        }
 
 
         /* Editor area */
@@ -102,6 +148,7 @@
             left: 0;
             right: 0;
             bottom: 0;
+            background: #1e1e1e;
         }
 
         /* File manager (slide-in drawer) */
@@ -163,11 +210,11 @@
             position: fixed;
             left: -110%;
             top: 0;
-            width: 92%;
+            width: 80%;
             max-width: 420px;
             height: 100%;
             background: var(--surface);
-            z-index: 120;
+            z-index: 140;
             transition: left .28s cubic-bezier(.22,.9,.36,1);
             overflow-y: auto;
             box-shadow: 2px 0 24px rgba(0,0,0,0.6);
@@ -179,16 +226,114 @@
         }
 
         .file-manager-header {
-            padding: calc(12px + var(--safe-top)) 14px 14px 14px;
+            padding: calc(6px + var(--safe-top)) 8px 6px 8px;
             background: var(--topbar);
             display: flex;
-            justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #444;
             position: sticky;
             top: 0;
             z-index: 2;
+            min-height: 64px;
+            box-sizing: border-box;
         }
+        .manue-container{
+            width: 40px;
+            height: 40px;
+            border-radius: 50px;
+            background: none;
+            display: flex;
+            justify-content: center;
+            position: absolute;
+            margin-right: 4px;
+            right: 0;
+        }
+        .three-dot {
+  font-size: 28px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+/* টাচ অ্যানিমেশন */
+.manue-container:active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  animation: threeDot 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+@keyframes threeDot {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* মেনু কন্টেইনার */
+.item-container {
+  width: 180px;
+  background: var(--panel-border);
+  color: white;
+  padding: 10px;
+  z-index: 10000;
+  position: fixed;
+  margin-right: 150px;
+  margin-top: 5px;
+  border-radius: 6px;
+
+  /* ডিফল্টে হাইড */
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* যখন active হবে */
+.item-container.show {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+
+        .item-container button {
+  width: 100%;              /* পুরো container জুড়ে */
+  padding: 10px 14px;       /* ভিতরের ফাঁকা */
+  font-size: 15px;          /* লেখার সাইজ */
+  text-align: left;         /* টেক্সট বাঁদিকে */
+  background: transparent;  /* ডিফল্টে transparent */
+  border: none;             /* বর্ডার বাদ */
+  border-radius: 4px;       /* হালকা কোণ গোল */
+  color: #222;              /* টেক্সট কালার */
+  color: white;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Hover এ */
+.item-container button:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+
+/* Active চাপার সময় */
+.item-container button:active {
+  background: #e0e0e0;
+}
+
+/* প্রথম এবং শেষ বাটনে একটু ভিন্ন কোণ */
+.item-container button:first-child {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+.item-container button:last-child {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
 
         .file-list { padding: 8px 0; }
         .file-item {
@@ -220,33 +365,45 @@
         }
         .status-info { display: flex; gap: 12px; align-items: center; }
 
-        /* Floating action button */
-        .quick-actions { position: fixed; bottom: calc(22px + var(--safe-bottom)); right: 18px; z-index: 140; }
-        .fab {
-            width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none;
-            font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-        }
-        .fab:active { transform: scale(.96); }
 
         /* Terminal panel */
         .terminal-panel {
             position: fixed;
-            bottom: -93.6%;
+            bottom: -81%;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 90.8%;
             background: #1e1e1e;
             z-index: 130;
-            transition: bottom .1s ease;
-            border-top: 2px solid #007acc;
+            transition: bottom 0s ease;
+            
+
         }
-        .terminal-panel.open { bottom: 0; }
+        .terminal-header{
+            width: 100%;
+            height: 72px;
+            background: #272727;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: -10px;
+            border-top: 1px solid #3e3e3e;
+            border-bottom: 2px solid #5e5e5e;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .terminal-header-title{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        
         .terminal-content {
             height: 100%;
             padding: 15px;
             overflow-y: auto;
-            wordWrap: pre;
             font-family: 'Courier New', monospace;
             font-size: 12px;
             color: #00ff00;
@@ -257,6 +414,16 @@
             .top-bar { gap: 8px; padding: calc(6px + var(--safe-top)) 10px 8px 10px; min-height: 56px; }
             .action-btn { padding: 10px 12px; height: 44px; font-size: 14px; min-width: 48px; }
             
+        }
+        .overlay {
+            position: fixed;          /* পুরো স্ক্রিন ঢেকে রাখবে */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4); /* ট্রান্সপারেন্ট শ্যাডো */
+            display: none;            /* প্রথমে লুকানো থাকবে */
+            z-index: 135;  
         }
         
     </style>
@@ -281,9 +448,14 @@
 
     <!-- Terminal Panel -->
     <div class="terminal-panel" id="terminal-panel">
+        <div id="terminal-header" class="terminal-header">
+            <h3 id="terminal-header-title">
+                Build output
+            </h3></br>
+            <p>Swipe up for build output</p>
+        </div>
         <div class="terminal-content" id="terminal-content">
-            Terminal output will appear here...<br>
-            Build results and logs will be shown in this area.
+            Run the Application to see it's build output hare.  
         </div>
     </div>
 
@@ -292,8 +464,17 @@
         <!-- Top Action Bar -->
         <div class="top-bar">
             <button class="action-btn secondary" onclick="toggleFileManager()">☰</button>
-            <button class="action-btn" onclick="saveFile()">💾 Save</button>
-            <button class="action-btn success" id="buildBtn">▶️</button>
+            <button class="action-btn success" id="buildBtn" aria-level="Run"></button>
+            
+            <div class="manue-container">
+                <button class="three-dot">⋮
+                </button>
+                <div class="item-container">
+                    <button id="fileSaveBtn" onclick="saveFile()">💾 Save</button>
+                    <button>🔄 Sync project</button>
+                    
+                </div>
+            </div>
             
         </div>
         
@@ -312,14 +493,25 @@
         </div>
     </div>
     
-    <!-- Floating Action Button -->
-    <div class="quick-actions">
-        <button class="fab" onclick="showQuickActions()">⋮</button>
-    </div>
 
     <!-- Monaco Editor with Fixed CDN -->
    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
 <script>
+const threeDotBtn = document.querySelector(".manue-container");
+const itemContainer = document.querySelector(".item-container");
+
+threeDotBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // বাটনে ক্লিক করলে event উপরে যাবে না
+    itemContainer.classList.toggle("show");
+});
+
+// বাইরে ক্লিক করলে মেনু হাইড হবে
+document.addEventListener("click", (e) => {
+    if (!itemContainer.contains(e.target) && !threeDotBtn.contains(e.target)) {
+        itemContainer.classList.remove("show");
+    }
+});
+
     // Monaco Editor Configuration
     require.config({
         paths: { 
@@ -384,10 +576,23 @@
     }
 
     // File Manager Functions
+    const overlay = document.getElementById('overlay');
+    overlay.addEventListener('click', ()=>{
+        overlay.style.display = 'none'
+    })
     function toggleFileManager() {
         const fileManager = document.getElementById('file-manager');
-        
-        closeTerminal(); // Close terminal if open
+        //overlay.style.display = 'block';
+
+        if (overlay.style.display === 'none') {
+            console.log('block')
+            overlay.style.display = 'block';  // যদি ব্লক থাকে → লুকানো
+        } else {
+            console.log('block')
+            overlay.style.display = 'block'; // যদি লুকানো থাকে → দেখানো
+        }
+        closeTerminal();
+        // Close terminal if open
         
         fileManager.classList.toggle('open');
         
@@ -398,6 +603,7 @@
 
     function closeFileManager() {
         document.getElementById('file-manager').classList.remove('open');
+        overlay.style.display = 'none';
     }
 /*
     // Terminal Functions
@@ -423,10 +629,9 @@
     const terminal = document.getElementById('terminal-panel');
 
     // শুধুমাত্র terminal খোলা না থাকলে open কর
-    if (!terminal.classList.contains('open')) {
-        terminal.classList.add('open');
-    }
-
+   //  if (!terminal.classList.contains('open')) { 
+     //    terminal.classList.add('open'); 
+     //}
     // content update করো
     document.getElementById('terminal-content').innerHTML = content;
 
@@ -663,6 +868,8 @@ function getLanguage(ext, filename) {
     
     
     const buildBtn = document.getElementById('buildBtn');
+    const buildHeaderTitle = document.getElementById('terminal-header-title');
+
 buildBtn.addEventListener('click', () => {
     if (!currentFile) {
         alert('Please open a project file first');
@@ -670,6 +877,7 @@ buildBtn.addEventListener('click', () => {
     }
 
     updateStatus('Building project...');
+    buildHeaderTitle.textContent = '⏳ Building project';
 
     // output কে শুরুতেই তৈরি করো
     let output = '<div style="color: #ffffff; font-family: monospace;">';
@@ -685,6 +893,9 @@ buildBtn.addEventListener('click', () => {
     if (event.data === "[DONE]") {
         evtSource.close();
         updateStatus('Build finished');
+        buildHeaderTitle.textContent = '✔️ Build finished';
+        buildHeaderTitle.style.color = 'green';
+
         return;
     }
 
@@ -702,36 +913,15 @@ buildBtn.addEventListener('click', () => {
         output += '<p class="status-error">Connection Error</p>';
         showTerminalOutput(output);
         updateStatus('Build failed');
+        buildHeaderTitle.textContent = '❌ Building failed';
+        buildHeaderTitle.style.color = 'red';
+
         evtSource.close();
     };
 
 });
 
 
-  
-
-    // Quick Actions Menu
-    function showQuickActions() {
-        const action = prompt(`Quick Actions:
-1. New File
-2. Refresh Files
-3. Clear Terminal
-4. Project Info
-
-Enter choice (1-4):`);
-
-        if (action === '1') {
-            createNewFile();
-        } else if (action === '2') {
-            loadFiles();
-            alert('Files refreshed');
-        } else if (action === '3') {
-            clearTerminal();
-            alert('Terminal cleared');
-        } else if (action === '4') {
-            showProjectInfo();
-        }
-    }
 
     function createNewFile() {
         const filename = prompt('Enter filename (e.g., MainActivity.kt):');
@@ -819,17 +1009,19 @@ window.addEventListener('beforeunload', function(e) {
     updateStatus('Ready - Open file manager to start coding');
 </script>
 <script>
-        const box = document.getElementById('terminal-panel');
+        const terminalPanel = document.getElementById('terminal-panel');
+        const terminalHeader = document.getElementById('terminal-header');
+        const MAX_TOP_MARGIN = 57.6;
         let isDragging = false;
         let startY;
         let startBottom;
 
         // মাউস ইভেন্ট
-        box.addEventListener('mousedown', (e) => {
+        terminalHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             startY = e.clientY;
-            startBottom = parseInt(getComputedStyle(box).bottom);
-            box.classList.add('grabbing');
+            startBottom = parseInt(getComputedStyle(terminalPanel).bottom);
+            terminalPanel.classList.add('grabbing');
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -838,37 +1030,38 @@ window.addEventListener('beforeunload', function(e) {
             let newBottom = startBottom + dy;
 
             // বাউন্ড চেক (বক্স পুরো স্ক্রিনের ভিতরে থাকবে)
-            const maxBottom = window.innerHeight - box.offsetHeight;
-            const minBottom = -box.offsetHeight + 50; // নিচ থেকে কিছুটা দেখা যাবে
+           const maxBottom = window.innerHeight - terminalPanel.offsetHeight - MAX_TOP_MARGIN;
+           const minBottom = -terminalPanel.offsetHeight + 50; // নিচ থেকে কিছুটা দেখা যাবে
+
             if (newBottom > maxBottom) newBottom = maxBottom;
             if (newBottom < minBottom) newBottom = minBottom;
 
-            box.style.bottom = newBottom + 'px';
+            terminalPanel.style.bottom = newBottom + 'px';
         });
 
         document.addEventListener('mouseup', () => {
             isDragging = false;
-            box.classList.remove('grabbing');
+            terminalPanel.classList.remove('grabbing');
         });
 
         // টাচ ইভেন্ট (মোবাইলের জন্য)
-        box.addEventListener('touchstart', (e) => {
+        terminalHeader.addEventListener('touchstart', (e) => {
             isDragging = true;
             startY = e.touches[0].clientY;
-            startBottom = parseInt(getComputedStyle(box).bottom);
+            startBottom = parseInt(getComputedStyle(terminalPanel).bottom);
         });
 
         document.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
             let dy = startY - e.touches[0].clientY;
             let newBottom = startBottom + dy;
-
-            const maxBottom = window.innerHeight - box.offsetHeight;
-            const minBottom = -box.offsetHeight + 50;
+            
+            const maxBottom = window.innerHeight - terminalPanel.offsetHeight - MAX_TOP_MARGIN;
+            const minBottom = -terminalPanel.offsetHeight + 72;
             if (newBottom > maxBottom) newBottom = maxBottom;
             if (newBottom < minBottom) newBottom = minBottom;
 
-            box.style.bottom = newBottom + 'px';
+            terminalPanel.style.bottom = newBottom + 'px';
         }, { passive: false });
 
         document.addEventListener('touchend', () => {
