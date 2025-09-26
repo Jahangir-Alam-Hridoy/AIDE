@@ -267,7 +267,7 @@
             background: none;
             display: flex;
             justify-content: center;
-            position: fixed;
+            position: absolute;
             margin-right: 4px;
             right: 0;
             z-index: 140;
@@ -279,6 +279,7 @@
   color: white;
   cursor: pointer;
   position: relative;
+  margin-top: 4px;
 }
 
 /* টাচ অ্যানিমেশন */
@@ -462,6 +463,29 @@
             z-index: 135;  
         }
         
+    
+        /* ===== Stylish Inline Dialog ===== */
+    .inline-dialog {
+    position: absolute;
+    background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+    font-size: 14px;
+    z-index: 1000;
+    max-width: 320px;
+    word-break: break-word;
+    border-left: 4px solid #ffcc00;
+    }
+    .inline-dialog code { background: #333; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+    .inline-dialog .buttons { margin-top: 10px; text-align: right; }
+    .inline-dialog button { margin-left: 6px; padding: 4px 10px; font-size: 13px; font-weight: 500; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s ease; }
+    .inline-dialog button.ok-btn { background-color: #4caf50; color: #fff; }
+    .inline-dialog button.ok-btn:hover { background-color: #45a049; }
+    .inline-dialog button.cancel-btn { background-color: #f44336; color: #fff; }
+    .inline-dialog button.cancel-btn:hover { background-color: #e53935; }
+    .inline-dialog::after { content: ""; position: absolute; width: 0; height: 0; border: 8px solid transparent; border-bottom-color: #1f1f1f; top: -16px; left: 20px; }
     </style>
 </head>
 <body>
@@ -484,16 +508,6 @@
             <div id="fileManagerTitle" class="file-manager-title"></div>
             <button class="action-btn secondary" onclick="closeFileManager()">✕</button>
             
-            <!-- File manager header এ reload button যোগ করুন -->
-<div class="file-manager-header">
-    <div id="fileManagerTitle" class="file-manager-title"></div>
-    <div style="display: flex; gap: 8px;">
-        <button class="action-btn secondary" onclick="reloadCurrentFile()" title="Reload file">
-            🔄
-        </button>
-        <button class="action-btn secondary" onclick="closeFileManager()">✕</button>
-    </div>
-</div>
         </div>
         <div class="file-list" id="file-list">
             <div style="padding: 20px; color: #aaa; text-align: center;">
@@ -547,35 +561,133 @@
 
     <!-- Monaco Editor with Fixed CDN -->
    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
-
-<script>
-
-// Reload function যোগ করুন
-async function reloadCurrentFile() {
-    if (!currentFile) {
-        alert('কোন ফাইল ওপেন নেই');
-        return;
+       <script>
+class InlineImportSuggester {
+    constructor(options) {
+        this.editor = options.editor;
+        this.importMap = options.importMap;
+        this.dialog = null;
+        this.subscribers = [];
+        this.bindEvents();
     }
-    
-    try {
-        const response = await fetch('/api/files/' + encodeURIComponent(currentFile) + '?t=' + Date.now());
-        const data = await response.json();
-        
-        if (data.error) throw new Error(data.error);
-        
-        const currentContent = editor.getValue();
-        if (currentContent !== data.content) {
-            editor.setValue(data.content);
-            updateStatus(`ফাইল রিলোড করা হয়েছে: ${currentFile}`);
-        } else {
-            updateStatus(`ফাইল ইতিমধ্যেই আপ টু ডেট: ${currentFile}`);
+
+    bindEvents() {
+        this.editor.onDidChangeModelContent(() => {
+            this.checkForMissingImports();
+        });
+    }
+
+    checkForMissingImports() {
+        const code = this.editor.getValue();
+        for (const [symbol, importStmt] of Object.entries(this.importMap)) {
+            const regex = new RegExp(`\\b${symbol}\\b`);
+            if (regex.test(code) && !code.includes(importStmt)) {
+                this.showDialog(symbol, importStmt);
+                this.notifySubscribers(symbol, importStmt);
+                break;
+            }
         }
-        
-    } catch (error) {
-        alert('রিলোড error: ' + error.message);
+    }
+
+    getCursorCoordinates() {
+        const position = this.editor.getPosition();
+        const top = this.editor.getTopForLineNumber(position.lineNumber);
+        const left = this.editor.getOffsetForColumn(position.lineNumber, position.column);
+        const editorDom = this.editor.getDomNode().getBoundingClientRect();
+        return { top: editorDom.top + top, left: editorDom.left + left };
+    }
+
+    showDialog(symbol, importStmt) {
+        if (this.dialog) this.dialog.remove();
+
+        const coords = this.getCursorCoordinates();
+        this.dialog = document.createElement("div");
+        this.dialog.className = "inline-dialog";
+        this.dialog.innerHTML = `
+            ⚠️ Missing import:<br><code>${importStmt}</code>
+            <div class="buttons">
+                <button class="ok-btn">✅ OK</button>
+                <button class="cancel-btn">❌ Cancel</button>
+            </div>
+        `;
+        document.body.appendChild(this.dialog);
+        this.positionDialog(coords);
+
+        this.dialog.querySelector(".ok-btn").onclick = () => {
+            this.applyImport(importStmt);
+            this.dialog.remove();
+            this.dialog = null;
+        };
+        this.dialog.querySelector(".cancel-btn").onclick = () => {
+            this.dialog.remove();
+            this.dialog = null;
+        };
+    }
+
+    positionDialog(coords) {
+        if (!this.dialog) return;
+        const padding = 8;
+        const dialogRect = this.dialog.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let top = coords.top + 20;
+        let left = coords.left;
+
+        if (left + dialogRect.width + padding > viewportWidth) {
+            left = viewportWidth - dialogRect.width - padding;
+        }
+        if (top + dialogRect.height + padding > viewportHeight) {
+            top = coords.top - dialogRect.height - padding;
+        }
+
+        this.dialog.style.top = top + "px";
+        this.dialog.style.left = left + "px";
+    }
+
+    applyImport(importStmt) {
+        let lines = this.editor.getValue().split("\n");
+        const pkgIndex = lines.findIndex(line => line.trim().startsWith("package"));
+        const packageLine = lines[pkgIndex];
+        let afterPackageIndex = pkgIndex + 1;
+        while (afterPackageIndex < lines.length && lines[afterPackageIndex].trim() === "") afterPackageIndex++;
+
+        let importLines = [];
+        let restLines = [];
+        let importEnded = false;
+        for (let i = afterPackageIndex; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.trim().startsWith("import") && !importEnded) importLines.push(line);
+            else { importEnded = true; restLines.push(line); }
+        }
+
+        if (!importLines.includes(importStmt)) importLines.push(importStmt);
+        importLines = [...new Set(importLines)].sort();
+
+        while (restLines.length && restLines[0].trim() === "") restLines.shift();
+
+        const finalCode = [
+            packageLine,
+            "",
+            ...importLines,
+            "",
+            ...restLines
+        ];
+
+        this.editor.setValue(finalCode.join("\n"));
+    }
+
+    subscribe(callback) {
+        if (typeof callback === "function") this.subscribers.push(callback);
+    }
+
+    notifySubscribers(symbol, importStmt) {
+        this.subscribers.forEach(cb => cb(symbol, importStmt));
     }
 }
+</script>
 
+<script>
 
 
 
@@ -705,6 +817,25 @@ document.addEventListener("click", (e) => {
                 },
                 padding: { top: 10, bottom: 10 }
             });
+            
+              //import suggester 
+
+const importMap = {
+    "Column": "import androidx.compose.foundation.layout.Column",
+    "Row": "import androidx.compose.foundation.layout.Row",
+    "Text": "import androidx.compose.material3.Text",
+    "Button": "import androidx.compose.material3.Button",
+    "Composable": "import androidx.compose.runtime.Composable",
+    "Modifier": "import androidx.compose.ui.Modifier"
+};
+
+// Attach Inline Import Suggester
+const suggester = new InlineImportSuggester({ editor: editor, importMap: importMap });
+
+// Optional: subscribe for logs or further UI update
+suggester.subscribe((symbol, importStmt) => {
+    console.log("Missing import detected:", symbol, importStmt);
+});
 
             // Update cursor position in real-time
             editor.onDidChangeCursorPosition(function(e) {
@@ -720,6 +851,8 @@ document.addEventListener("click", (e) => {
             });
         });
     });
+  
+    
 
     // Modal Management Functions
     function closeAllModals() {
@@ -1226,6 +1359,8 @@ window.addEventListener('beforeunload', function(e) {
             isDragging = false;
         });
     </script>
+    
+
 </body>
 </html>
 
