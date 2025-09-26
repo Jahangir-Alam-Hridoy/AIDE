@@ -603,6 +603,7 @@ const itemContainer = document.querySelector(".item-container");
 threeDotBtn.addEventListener("click", (e) => {
     e.stopPropagation(); // বাটনে ক্লিক করলে event উপরে যাবে না
     itemContainer.classList.toggle("show");
+    document.getElementById("overlay").style.display = 'block';
 });
 
 // বাইরে ক্লিক করলে মেনু হাইড হবে
