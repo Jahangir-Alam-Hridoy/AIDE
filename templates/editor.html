@@ -1010,7 +1010,7 @@ buildBtn.addEventListener('click', () => {
         buildHeaderTitle.textContent = '❌ Build failed';
         output += '<p class="status-error">❌ Build Failed</p>';
     } else if (event.data.includes("❌ gradlew not found in project root!")){
-        buildHeaderTitle.textContent = 'gradlew not found!';
+        alert('gradlew not found!');
     }else {
         output += '<p>' + event.data + '</p>';
     }
