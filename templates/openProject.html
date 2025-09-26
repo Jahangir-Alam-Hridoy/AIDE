@@ -12,26 +12,38 @@
             margin: 0;  
             color: #e4e6eb;
             background-color: #1e1e1e;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .container { 
             width: 92%; 
             padding: 12px; 
             background: #1e1e1e; 
-            border-radius: 8px;  
-            margin: auto; 
+            margin: auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
-        h1 { 
+        .header { 
             color: #e4e6eb; 
             border-bottom: 1px solid #444; 
             padding-bottom: 1rem; 
-            margin-top: 0; 
+            margin-top: 0;
+            flex-shrink: 0;
+        }
+        
+        .list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 1rem;
         }
         
         ul { 
             list-style: none; 
             padding: 0; 
+            margin: 0;
         }
         
         .item { 
@@ -202,25 +214,45 @@
             background-color: #3d3d3d; 
             color: #e4e6eb;
         }
+        
+        /* Scrollbar styling for dark theme */
+        .list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .list-container::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        .list-container::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        
+        .list-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center;">Projects</h1>
-        <ul id="itemList">
-            {% for item in items %}
-            <li class="item" data-path="{{ item.path|urlencode }}">
-                <span class="item-name">
-                    {{ item.name }}
-                    {% if item.is_dir %}<span class="dir-tag">[DIR]</span>{% endif %}
-                </span>
-                <button class="menu-btn" onclick="showContextMenu(event, this)">⋮</button>
-            </li>
-            {% endfor %}
-            {% if not items %}
-                <p>No projects found in workspace.</p>
-            {% endif %}
-        </ul>
+        <h1 class="header" style="text-align: center;">Projects</h1>
+        <div class="list-container">
+            <ul id="itemList">
+                {% for item in items %}
+                <li class="item" data-path="{{ item.path|urlencode }}">
+                    <span class="item-name">
+                        {{ item.name }}
+                        {% if item.is_dir %}<span class="dir-tag">[DIR]</span>{% endif %}
+                    </span>
+                    <button class="menu-btn" onclick="showContextMenu(event, this)">⋮</button>
+                </li>
+                {% endfor %}
+                {% if not items %}
+                    <p>No projects found in workspace.</p>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 
     <div id="contextMenu">
