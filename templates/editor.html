@@ -486,10 +486,80 @@
     .inline-dialog button.cancel-btn { background-color: #f44336; color: #fff; }
     .inline-dialog button.cancel-btn:hover { background-color: #e53935; }
     .inline-dialog::after { content: ""; position: absolute; width: 0; height: 0; border: 8px solid transparent; border-bottom-color: #1f1f1f; top: -16px; left: 20px; }
+    
+    /*zoom in zoom out control*/
+    /* Floating zoom container */
+.zoom-float-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Main toggle button */
+.zoom-main-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007acc;
+    color: #fff;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Zoom In / Out buttons */
+.zoom-buttons {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.zoom-buttons.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.zoom-buttons button {
+    margin: 6px 0;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    background-color: #4caf50;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.zoom-buttons button.minus {
+    background-color: #f44336;
+}
     </style>
 </head>
 <body>
-    
+    <div class="zoom-float-container">
+  <div class="zoom-buttons" id="zoomBtns">
+    <button id="zoomInBtn">➕</button>
+    <button id="zoomOutBtn" class="minus">➖</button>
+  </div>
+  <div class="zoom-main-btn" id="zoomMainBtn">🔍</div>
+</div>
+
+
+
     <div class="manue-container">
         <button class="three-dot">⋮
         </button>
@@ -536,7 +606,6 @@
         <div class="top-bar">
             <button class="action-btn secondary" onclick="toggleFileManager()">☰</button>
             <button class="action-btn success" id="buildBtn" aria-level="Run"></button>
-            
             
             <div id="progress-container">
                 <div id="progress-bar"></div>
@@ -836,6 +905,34 @@ const suggester = new InlineImportSuggester({ editor: editor, importMap: importM
 suggester.subscribe((symbol, importStmt) => {
     console.log("Missing import detected:", symbol, importStmt);
 });
+      let currentFontSize = 14; // Default font size
+const zoomMainBtn = document.getElementById('zoomMainBtn');
+const zoomBtns = document.getElementById('zoomBtns');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+
+let zoomVisible = false;
+
+// Toggle animation
+zoomMainBtn.addEventListener('click', () => {
+    zoomVisible = !zoomVisible;
+    if (zoomVisible) zoomBtns.classList.add('show');
+    else zoomBtns.classList.remove('show');
+});
+
+// Zoom In
+zoomInBtn.addEventListener('click', () => {
+    currentFontSize = Math.min(30, currentFontSize + 2);
+    editor.updateOptions({ fontSize: currentFontSize });
+});
+
+// Zoom Out
+zoomOutBtn.addEventListener('click', () => {
+    currentFontSize = Math.max(3, currentFontSize - 2);
+    editor.updateOptions({ fontSize: currentFontSize });
+});
+      
+      
 
             // Update cursor position in real-time
             editor.onDidChangeCursorPosition(function(e) {
