@@ -465,6 +465,7 @@
     </style>
 </head>
 <body>
+    
     <div class="manue-container">
         <button class="three-dot">⋮
         </button>
@@ -482,6 +483,17 @@
         <div class="file-manager-header">
             <div id="fileManagerTitle" class="file-manager-title"></div>
             <button class="action-btn secondary" onclick="closeFileManager()">✕</button>
+            
+            <!-- File manager header এ reload button যোগ করুন -->
+<div class="file-manager-header">
+    <div id="fileManagerTitle" class="file-manager-title"></div>
+    <div style="display: flex; gap: 8px;">
+        <button class="action-btn secondary" onclick="reloadCurrentFile()" title="Reload file">
+            🔄
+        </button>
+        <button class="action-btn secondary" onclick="closeFileManager()">✕</button>
+    </div>
+</div>
         </div>
         <div class="file-list" id="file-list">
             <div style="padding: 20px; color: #aaa; text-align: center;">
@@ -537,6 +549,42 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
 
 <script>
+
+// Reload function যোগ করুন
+async function reloadCurrentFile() {
+    if (!currentFile) {
+        alert('কোন ফাইল ওপেন নেই');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/files/' + encodeURIComponent(currentFile) + '?t=' + Date.now());
+        const data = await response.json();
+        
+        if (data.error) throw new Error(data.error);
+        
+        const currentContent = editor.getValue();
+        if (currentContent !== data.content) {
+            editor.setValue(data.content);
+            updateStatus(`ফাইল রিলোড করা হয়েছে: ${currentFile}`);
+        } else {
+            updateStatus(`ফাইল ইতিমধ্যেই আপ টু ডেট: ${currentFile}`);
+        }
+        
+    } catch (error) {
+        alert('রিলোড error: ' + error.message);
+    }
+}
+
+
+
+
+
+
+
+
+
+
     let progressBar = document.getElementById("progress-bar");
     let animationId;
     let pos = -20;
