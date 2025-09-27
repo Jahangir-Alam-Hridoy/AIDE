@@ -207,7 +207,9 @@ def build_tree(path):
             for entry in it:
                 if entry.is_dir():
                     tree[entry.name] = build_tree(entry.path)
-                elif entry.is_file() and entry.name.endswith(('.kt', '.java', '.xml', '.gradle', '.txt')):
+                elif entry.is_file():
+
+                #elif entry.is_file() and entry.name.endswith(('.kt', '.java', '.xml', '.gradle', '.txt', '.properties', '.kts', '.toml', )):
                     tree[entry.name] = None  # ফাইলের জন্য None বা ফাইল মেটাডেটা রাখতে পারো
     except PermissionError:
         pass
