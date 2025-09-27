@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Android IDE</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Highlight.js -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+
     <style>
         :root {
- 
+
             --surface: #252526;
             --muted: #9aa4b2;
             --primary: #007acc;
@@ -22,8 +31,18 @@
         }
 
         /* reset & base */
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
         body {
             font-family: "Roboto", "Noto Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
             background: var(--bg);
@@ -51,7 +70,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            
+
             min-height: 64px;
             border-bottom: 1px solid #444;
             -webkit-overflow-scrolling: touch;
@@ -60,29 +79,35 @@
         }
 
         /* hide scrollbar visually but allow scrolling */
-        .top-bar::-webkit-scrollbar { height: 6px; }
-        .top-bar::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
-        
+        .top-bar::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .top-bar::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 6px;
+        }
+
         /* progress bar */
         #progress-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background-color: rgba(0, 0, 0, 0.05);
-    z-index: 150;
-    overflow: hidden;
-}
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: rgba(0, 0, 0, 0.05);
+            z-index: 150;
+            overflow: hidden;
+        }
 
-#progress-bar {
-    height: 100%;
-    width: 20%;
-    background-color: #4cafef;
-    position: absolute;
-    left: -20%;
-    border-radius: 3px;
-}
+        #progress-bar {
+            height: 100%;
+            width: 20%;
+            background-color: #4cafef;
+            position: absolute;
+            left: -20%;
+            border-radius: 3px;
+        }
 
         /* Action Buttons (larger targets for thumbs) */
         .action-btn {
@@ -101,23 +126,29 @@
             justify-content: center;
             gap: 8px;
         }
-        
-        .action-btn.success{font-size: 20px;}
-        .action-btn.secondary{
-            font-size:20px;
+
+        .action-btn.success {
+            font-size: 20px;
+        }
+
+        .action-btn.secondary {
+            font-size: 20px;
             font-weight: bold;
             position: relative;
             right: 0;
         }
-        .action-btn.warning { background: var(--warn); }
-        
+
+        .action-btn.warning {
+            background: var(--warn);
+        }
+
         #buildBtn {
             position: absolute;
             width: 40px;
             height: 40px;
             border: none;
             border-radius: 50px;
-            background: none; 
+            background: none;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -126,31 +157,41 @@
             right: 0;
             margin-right: 70px;
         }
-      
 
-/* টাচ/ক্লিক অ্যানিমেশন */
-#buildBtn:active::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.3); /* চাপ দিলে গাঢ় হবে */
-  animation: fadeTouch 0.3s ease;
-  pointer-events: none;
-  border-radius: inherit;
-}
 
-@keyframes fadeTouch {
-  0% { opacity: 0; }
-  30% { opacity: 1; }
-  100% { opacity: 0; }
-}
+        /* টাচ/ক্লিক অ্যানিমেশন */
+        #buildBtn:active::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            /* চাপ দিলে গাঢ় হবে */
+            animation: fadeTouch 0.3s ease;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        @keyframes fadeTouch {
+            0% {
+                opacity: 0;
+            }
+
+            30% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
 
         #buildBtn::before {
             content: "";
             display: block;
             width: 0;
             height: 0;
-            border-left: 12px solid #2ecc71;   /* প্লে আইকনের সাদা ত্রিভুজ */
+            border-left: 12px solid #2ecc71;
+            /* প্লে আইকনের সাদা ত্রিভুজ */
             border-top: 8px solid transparent;
             border-bottom: 8px solid transparent;
             margin-left: 3px;
@@ -164,6 +205,7 @@
             min-height: 0;
             width: 100%;
         }
+
         #editor {
             position: absolute;
             top: 0;
@@ -175,55 +217,62 @@
 
         /* File manager (slide-in drawer) */
         /* File tree root UL */
-.file-list ul {
-    list-style: none;          /* remove bullets */
-    padding-left: 10px;        /* base indentation */
-    margin: 0;
-}
+        .file-list ul {
+            list-style: none;
+            /* remove bullets */
+            padding-left: 10px;
+            /* base indentation */
+            margin: 0;
+        }
 
-/* Nested UL */
-.file-list ul ul {
-    padding-left: 15px;        /* nested indentation */
-    display: none;             /* hide child by default */
-}
+        /* Nested UL */
+        .file-list ul ul {
+            padding-left: 15px;
+            /* nested indentation */
+            display: none;
+            /* hide child by default */
+        }
 
-/* Folder styling */
-.folder {
-    font-weight: bold;
-    color: #00bfff;           /* blue-ish for folders */
-    cursor: pointer;
-    user-select: none;
-}
+        /* Folder styling */
+        .folder {
+            font-weight: bold;
+            color: #00bfff;
+            /* blue-ish for folders */
+            cursor: pointer;
+            user-select: none;
+        }
 
-/* Folder hover */
-.folder:hover {
-    color: #1e90ff;
-}
+        /* Folder hover */
+        .folder:hover {
+            color: #1e90ff;
+        }
 
-/* File styling */
-.file {
-    color: #ffffff;           /* normal file color */
-    cursor: pointer;
-    user-select: none;
-}
+        /* File styling */
+        .file {
+            color: #ffffff;
+            /* normal file color */
+            cursor: pointer;
+            user-select: none;
+        }
 
-/* File hover */
-.file:hover {
-    color: #00ff99;
-}
+        /* File hover */
+        .file:hover {
+            color: #00ff99;
+        }
 
-/* Optional icons using pseudo-elements */
-.folder::before {
-    content: "📁 ";
-}
-.file::before {
-    content: "📄 ";
-}
+        /* Optional icons using pseudo-elements */
+        .folder::before {
+            content: "📁 ";
+        }
 
-/* Add small spacing between items */
-.file-list li {
-    margin: 3px 0;
-}
+        .file::before {
+            content: "📄 ";
+        }
+
+        /* Add small spacing between items */
+        .file-list li {
+            margin: 3px 0;
+        }
 
 
 
@@ -237,14 +286,20 @@
             height: 100%;
             background: #282A36;
             z-index: 140;
-            transition: left .28s cubic-bezier(.22,.9,.36,1);
+            transition: left .28s cubic-bezier(.22, .9, .36, 1);
             overflow-y: auto;
-            box-shadow: 2px 0 24px rgba(0,0,0,0.6);
+            box-shadow: 2px 0 24px rgba(0, 0, 0, 0.6);
         }
-        .file-manager.open { left: 0; }
+
+        .file-manager.open {
+            left: 0;
+        }
 
         @media (max-width: 380px) {
-            .file-manager { width: 100%; max-width: 100%; }
+            .file-manager {
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         .file-manager-header {
@@ -260,7 +315,8 @@
             min-height: 59px;
             box-sizing: border-box;
         }
-        .manue-container{
+
+        .manue-container {
             width: 40px;
             height: 40px;
             border-radius: 50px;
@@ -269,97 +325,119 @@
             justify-content: center;
             position: absolute;
             margin-right: 4px;
+            margin-top: 6px;
             right: 0;
             z-index: 140;
         }
+
         .three-dot {
-  font-size: 28px;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  position: relative;
-  margin-top: 4px;
-}
+            font-size: 28px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            position: relative;
+        }
 
-/* টাচ অ্যানিমেশন */
-.manue-container:active::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  animation: threeDot 0.3s ease;
-  pointer-events: none;
-  border-radius: inherit;
-}
-@keyframes threeDot {
-  0% { opacity: 0; }
-  30% { opacity: 1; }
-  100% { opacity: 0; }
-}
+        /* টাচ অ্যানিমেশন */
+        .manue-container:active::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            animation: threeDot 0.3s ease;
+            pointer-events: none;
+            border-radius: inherit;
+        }
 
-/* মেনু কন্টেইনার */
-.item-container {
-  width: 180px;
-  background: #201f25;
-  color: white;
-  padding: 10px;
-  position: fixed;
-  margin-right: 150px;
-  margin-top: 5px;
-  border-radius: 6px;
-  z-index: 999;
-  /* ডিফল্টে হাইড */
-  opacity: 0;
-  transform: scale(0.95);
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
+        @keyframes threeDot {
+            0% {
+                opacity: 0;
+            }
 
-/* যখন active হবে */
-.item-container.show {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
-}
+            30% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* মেনু কন্টেইনার */
+        .item-container {
+            width: 180px;
+            background: #201f25;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            margin-right: 150px;
+            margin-top: 5px;
+            border-radius: 6px;
+            z-index: 999;
+            /* ডিফল্টে হাইড */
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        /* যখন active হবে */
+        .item-container.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
 
 
         .item-container button {
-  width: 100%;              /* পুরো container জুড়ে */
-  padding: 10px 14px;       /* ভিতরের ফাঁকা */
-  font-size: 15px;          /* লেখার সাইজ */
-  text-align: left;         /* টেক্সট বাঁদিকে */
-  background: transparent;  /* ডিফল্টে transparent */
-  border: none;             /* বর্ডার বাদ */
-  border-radius: 4px;       /* হালকা কোণ গোল */
-  color: #222;              /* টেক্সট কালার */
-  color: white;
-  transition: background 0.2s ease, color 0.2s ease;
-}
+            width: 100%;
+            /* পুরো container জুড়ে */
+            padding: 10px 14px;
+            /* ভিতরের ফাঁকা */
+            font-size: 15px;
+            /* লেখার সাইজ */
+            text-align: left;
+            /* টেক্সট বাঁদিকে */
+            background: transparent;
+            /* ডিফল্টে transparent */
+            border: none;
+            /* বর্ডার বাদ */
+            border-radius: 4px;
+            /* হালকা কোণ গোল */
+            color: #222;
+            /* টেক্সট কালার */
+            color: white;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
 
-/* Hover এ */
-.item-container button:hover {
-  background: #f0f0f0;
-  color: #000;
-}
+        /* Hover এ */
+        .item-container button:hover {
+            background: #f0f0f0;
+            color: #000;
+        }
 
-/* Active চাপার সময় */
-.item-container button:active {
-  background: #e0e0e0;
-}
+        /* Active চাপার সময় */
+        .item-container button:active {
+            background: #e0e0e0;
+        }
 
-/* প্রথম এবং শেষ বাটনে একটু ভিন্ন কোণ */
-.item-container button:first-child {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-}
-.item-container button:last-child {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-}
+        /* প্রথম এবং শেষ বাটনে একটু ভিন্ন কোণ */
+        .item-container button:first-child {
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+
+        .item-container button:last-child {
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
 
 
-        .file-list { padding: 8px 0; }
+        .file-list {
+            padding: 8px 0;
+        }
+
         .file-item {
             padding: 14px 16px;
             border-bottom: 1px solid var(--panel-border);
@@ -371,8 +449,16 @@
             gap: 12px;
             transition: background .12s;
         }
-        .file-item:active { background: #333; }
-        .file-icon { font-size: 18px; width: 28px; text-align: center; }
+
+        .file-item:active {
+            background: #333;
+        }
+
+        .file-icon {
+            font-size: 18px;
+            width: 28px;
+            text-align: center;
+        }
 
 
         /* Status bar */
@@ -387,7 +473,12 @@
             gap: 10px;
             padding-bottom: calc(10px + var(--safe-bottom));
         }
-        .status-info { display: flex; gap: 12px; align-items: center; }
+
+        .status-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
 
 
         /* Terminal panel */
@@ -400,41 +491,46 @@
             background: #1e1e1e;
             z-index: 130;
             transition: bottom 0s ease;
-            
+
 
         }
- .terminal-header {
-    width: 100%;
-    background: #282A36;
-    display: flex;
-    flex-direction: column;      /* উল্লম্বভাবে সাজানো */
-    justify-content: center;     /* ভর্তিকাল সেন্টার */
-    align-items: center;         /* অনুভূমিক সেন্টার */
-    border-top: 1px solid #7e7e7e;
-    border-bottom: 0.5px solid #5e5e5e;
-    padding: 8px 12px;           /* ভেতরে কিছু প্যাডিং  আর লেখার মাঝে কম ফাঁকা */
-}
 
-.terminal-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    color: #ffffff;
-    letter-spacing: 0.4px;
-    line-height: 1.2;
-}
+        .terminal-header {
+            width: 100%;
+            background: #282A36;
+            display: flex;
+            flex-direction: column;
+            /* উল্লম্বভাবে সাজানো */
+            justify-content: center;
+            /* ভর্তিকাল সেন্টার */
+            align-items: center;
+            /* অনুভূমিক সেন্টার */
+            border-top: 1px solid #7e7e7e;
+            border-bottom: 0.5px solid #5e5e5e;
+            padding: 8px 12px;
+            /* ভেতরে কিছু প্যাডিং  আর লেখার মাঝে কম ফাঁকা */
+        }
 
-.terminal-header p {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 400;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    color: #bbbbbb;
-    line-height: 1.2;
-}
-        
-        
+        .terminal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+            line-height: 1.2;
+        }
+
+        .terminal-header p {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 400;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            color: #bbbbbb;
+            line-height: 1.2;
+        }
+
+
         .terminal-content {
             height: 100%;
             padding: 15px;
@@ -448,192 +544,479 @@
         }
 
         @media (max-width: 480px) {
-            .top-bar { gap: 8px; padding: calc(6px + var(--safe-top)) 10px 8px 10px; min-height: 56px; }
-            .action-btn { padding: 10px 12px; height: 44px; font-size: 14px; min-width: 48px; }
-            
+            .top-bar {
+                gap: 8px;
+                padding: calc(6px + var(--safe-top)) 10px 8px 10px;
+                min-height: 56px;
+            }
+
+            .action-btn {
+                padding: 10px 12px;
+                height: 44px;
+                font-size: 14px;
+                min-width: 48px;
+            }
+
         }
+
         .overlay {
-            position: fixed;          /* পুরো স্ক্রিন ঢেকে রাখবে */
+            position: fixed;
+            /* পুরো স্ক্রিন ঢেকে রাখবে */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.12); /* ট্রান্সপারেন্ট শ্যাডো */
-            display: none;            /* প্রথমে লুকানো থাকবে */
-            z-index: 135;  
+            background: rgba(0, 0, 0, 0.12);
+            /* ট্রান্সপারেন্ট শ্যাডো */
+            display: none;
+            /* প্রথমে লুকানো থাকবে */
+            z-index: 135;
         }
-        
-    
+
+
         /* ===== Stylish Inline Dialog ===== */
-    .inline-dialog {
-    position: absolute;
-    background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
-    color: #fff;
-    padding: 12px 16px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.8);
-    font-size: 14px;
-    z-index: 1000;
-    max-width: 320px;
-    word-break: break-word;
-    border-left: 4px solid #ffcc00;
-    }
-    .inline-dialog code { background: #333; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
-    .inline-dialog .buttons { margin-top: 10px; text-align: right; }
-    .inline-dialog button { margin-left: 6px; padding: 4px 10px; font-size: 13px; font-weight: 500; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s ease; }
-    .inline-dialog button.ok-btn { background-color: #4caf50; color: #fff; }
-    .inline-dialog button.ok-btn:hover { background-color: #45a049; }
-    .inline-dialog button.cancel-btn { background-color: #f44336; color: #fff; }
-    .inline-dialog button.cancel-btn:hover { background-color: #e53935; }
-    .inline-dialog::after { content: ""; position: absolute; width: 0; height: 0; border: 8px solid transparent; border-bottom-color: #1f1f1f; top: -16px; left: 20px; }
-    
-    /*zoom in zoom out control*/
-/* Floating zoom container */
-.zoom-float-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 1000;
-}
+        .inline-dialog {
+            position: absolute;
+            background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+            font-size: 14px;
+            z-index: 1000;
+            max-width: 320px;
+            word-break: break-word;
+            border-left: 4px solid #ffcc00;
+        }
 
-/* Main toggle button */
-.zoom-main-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 2;
-}
+        .inline-dialog code {
+            background: #333;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
 
-.zoom-main-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
-}
+        .inline-dialog .buttons {
+            margin-top: 10px;
+            text-align: right;
+        }
 
-.zoom-main-btn svg {
-    transition: transform 0.3s ease;
-}
+        .inline-dialog button {
+            margin-left: 6px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-.zoom-main-btn.active svg {
-    transform: rotate(45deg);
-}
+        .inline-dialog button.ok-btn {
+            background-color: #4caf50;
+            color: #fff;
+        }
 
-/* Zoom In / Out buttons */
-.zoom-buttons {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    opacity: 0;
-    transform: translateY(20px) scale(0.8);
-    pointer-events: none;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+        .inline-dialog button.ok-btn:hover {
+            background-color: #45a049;
+        }
 
-.zoom-buttons.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-}
+        .inline-dialog button.cancel-btn {
+            background-color: #f44336;
+            color: #fff;
+        }
 
-.zoom-btn {
-    margin: 8px 0;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        .inline-dialog button.cancel-btn:hover {
+            background-color: #e53935;
+        }
 
-.zoom-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
-}
+        .inline-dialog::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 8px solid transparent;
+            border-bottom-color: #1f1f1f;
+            top: -16px;
+            left: 20px;
+        }
 
-.zoom-btn:active {
-    transform: translateY(0);
-}
+        /*zoom in zoom out control*/
+        /* Floating zoom container */
+        .zoom-float-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 135;
+        }
 
-.zoom-btn.minus {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-    box-shadow: 0 6px 20px rgba(255, 154, 158, 0.4);
-}
+        /* Main toggle button */
+        .zoom-main-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+        }
 
-.zoom-btn.minus:hover {
-    box-shadow: 0 8px 25px rgba(255, 154, 158, 0.6);
-}
+        .zoom-main-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
 
-.zoom-btn.reset {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    box-shadow: 0 6px 20px rgba(168, 237, 234, 0.4);
-}
+        .zoom-main-btn svg {
+            transition: transform 0.3s ease;
+        }
 
-.zoom-btn.reset:hover {
-    box-shadow: 0 8px 25px rgba(168, 237, 234, 0.6);
-}
+        .zoom-main-btn.active svg {
+            transform: rotate(45deg);
+        }
 
-/* Animation for button appearance */
-.zoom-buttons.show .zoom-btn {
-    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
+        /* Zoom In / Out buttons */
+        .zoom-buttons {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-.zoom-buttons.show .zoom-btn:nth-child(1) {
-    animation-delay: 0.05s;
-}
+        .zoom-buttons.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
 
-.zoom-buttons.show .zoom-btn:nth-child(2) {
-    animation-delay: 0.1s;
-}
+        .zoom-btn {
+            margin: 8px 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.zoom-buttons.show .zoom-btn:nth-child(3) {
-    animation-delay: 0.15s;
-}
+        .zoom-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
+        .zoom-btn:active {
+            transform: translateY(0);
+        }
 
-/* Pulse animation for main button when active */
-@keyframes pulse {
-    0% {
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-    50% {
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.8);
-    }
-    100% {
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-}
+        .zoom-btn.minus {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            box-shadow: 0 6px 20px rgba(255, 154, 158, 0.4);
+        }
 
-.zoom-main-btn.pulse {
-    animation: pulse 2s infinite;
-}
+        .zoom-btn.minus:hover {
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.6);
+        }
+
+        .zoom-btn.reset {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            box-shadow: 0 6px 20px rgba(168, 237, 234, 0.4);
+        }
+
+        .zoom-btn.reset:hover {
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.6);
+        }
+
+        /* Animation for button appearance */
+        .zoom-buttons.show .zoom-btn {
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .zoom-buttons.show .zoom-btn:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .zoom-buttons.show .zoom-btn:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .zoom-buttons.show .zoom-btn:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Pulse animation for main button when active */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+        }
+
+        .zoom-main-btn.pulse {
+            animation: pulse 2s infinite;
+        }
+
+
+        /* AI Panel Overlay */
+        #ai-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 40%;
+            min-width: 400px;
+            height: 100%;
+            background: #252526;
+            border-left: 2px solid #007acc;
+            display: none;
+            border-radius: 10px;
+            flex-direction: column;
+            z-index: 9999;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #ai-panel button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            background: #007acc;
+            color: white;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        #ai-panel button:hover {
+            background: #0099ff;
+            transform: translateY(-1px);
+        }
+
+        #ai-panel button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        #ai-panel.open {
+            display: block;
+        }
+
+        #ai-panel .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #007acc;
+        }
+
+        #ai-panel .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00aaff;
+        }
+
+        #ai-panel .panel-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        #ai-panel .panel-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+
+        #ai-panel .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #444;
+            background: #2d2d2d;
+        }
+
+        #aiPrompt {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #1e1e1e;
+            color: white;
+            font-size: 14px;
+            resize: none;
+            height: 60px;
+            font-family: inherit;
+        }
+
+        #aiPrompt:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+
+        #aiOutput {
+            flex: 1;
+            padding: 15px;
+            padding-bottom: 70px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: white;
+            line-height: 1.6;
+        }
+
+        #aiOutput pre {
+            position: relative;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 3px solid #007acc;
+        }
+
+        #aiOutput code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+        }
+
+        #aiOutput p {
+            margin-bottom: 10px;
+        }
+
+        #aiOutput ul,
+        #aiOutput ol {
+            margin: 10px 0 10px 20px;
+        }
+
+        #aiOutput li {
+            margin-bottom: 5px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #007acc;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+
+        .copy-btn:hover {
+            background: #0099ff;
+        }
+
+        .thinking {
+            color: #ffa500;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thinking::before {
+            content: "⏳";
+            font-size: 18px;
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .success {
+            color: #51cf66;
+            background: rgba(81, 207, 102, 0.1);
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 3px solid #51cf66;
+        }
+
+        #ai-toggle {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #ai-toggle::before {
+            content: "🤖";
+        }
+
+        #ai-panel #aiClose {
+            background: #dc3545;
+        }
+
+        #ai-panel #aiClose:hover {
+            background: #c82333;
+        }
+
+
+
+        @media (max-width: 768px) {
+
+            #ai-panel {
+                position: relative;
+                width: 100%;
+                min-width: auto;
+                height: 100vh;
+                border-left: none;
+                border-top: 2px solid #007acc;
+            }
+
+            #ai-panel .input-area {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
+
 <body>
     <!-- Floating zoom container -->
     <div class="zoom-float-container">
@@ -656,7 +1039,9 @@
         </div>
         <div class="zoom-main-btn" id="zoomMainBtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path
+                    d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
         </div>
     </div>
@@ -670,18 +1055,38 @@
         <div class="item-container">
             <button id="fileSaveBtn" onclick="saveFile()">💾 Save</button>
             <button>🔄 Sync project</button>
-                    
+            <button id="ai-toggle">AI Agent</button>
+
         </div>
     </div>
     <!-- Overlay for modals -->
     <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
-    
+
+    <!-- AI Agent Panel -->
+    <div id="ai-panel">
+        <div class="panel-header">
+            <div class="panel-title">AI Assistant</div>
+            <div class="panel-controls">
+                <button id="aiCheck">Analyze Code</button>
+                <button id="aiClose">Close</button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="input-area">
+                <textarea id="aiPrompt" placeholder="Ask the AI assistant about your code..."></textarea>
+                <button id="aiSend">Send</button>
+            </div>
+            <div id="aiOutput">💡 AI responses will appear here. Ask about your code or request improvements.</div>
+        </div>
+    </div>
+
+
     <!-- Slide-in File Manager -->
     <div class="file-manager" id="file-manager">
         <div class="file-manager-header">
             <div id="fileManagerTitle" class="file-manager-title"></div>
             <button class="action-btn secondary" onclick="closeFileManager()">✕</button>
-            
+
         </div>
         <div class="file-list" id="file-list">
             <div style="padding: 20px; color: #aaa; text-align: center;">
@@ -700,7 +1105,7 @@
             <p>Swipe up for build output</p>
         </div>
         <div class="terminal-content" id="terminal-content">
-            Run the Application to see it's build output hare.  
+            Run the Application to see it's build output hare.
         </div>
     </div>
 
@@ -709,18 +1114,18 @@
         <!-- Top Action Bar -->
         <div class="top-bar">
             <button class="action-btn secondary" onclick="toggleFileManager()">☰</button>
-            <button class="action-btn success" id="buildBtn" aria-level="Run"></button>
-            
+            <button class="action-btn" id="buildBtn" aria-level="Run"></button>
+
             <div id="progress-container">
                 <div id="progress-bar"></div>
             </div>
         </div>
-        
+
         <!-- Full Screen Editor -->
         <div class="editor-fullscreen">
             <div id="editor"></div>
         </div>
-        
+
         <!-- Status Bar -->
         <div class="status-bar">
             <div id="status-message">Ready - Open a file to start editing</div>
@@ -730,12 +1135,12 @@
             </div>
         </div>
     </div>
-    
+
 
     <!-- Monaco Editor with Fixed CDN -->
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
-       <script>
-class InlineImportSuggester {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
+    <script>
+        class InlineImportSuggester {
     constructor(options) {
         this.editor = options.editor;
         this.importMap = options.importMap;
@@ -858,19 +1263,10 @@ class InlineImportSuggester {
         this.subscribers.forEach(cb => cb(symbol, importStmt));
     }
 }
-</script>
+    </script>
 
-<script>
-
-
-
-
-
-
-
-
-
-    let progressBar = document.getElementById("progress-bar");
+    <script type="module">
+        let progressBar = document.getElementById("progress-bar");
     let animationId;
     let pos = -20;
     let width = 20;
@@ -949,6 +1345,40 @@ document.addEventListener("click", (e) => {
     }
 });
 
+
+// Gemini api key
+
+    import { GoogleGenerativeAI } from 'https://esm.run/@google/generative-ai';
+    
+    // Initialize API
+    const API_KEY = "AIzaSyDKlQ12gSpft2AN1daUUlE_daJ0d8XjQng";
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash", // Using a more reliable model
+      generationConfig: {
+        temperature: 0.7, 
+        maxOutputTokens: 2000,
+        topP: 0.8,
+        topK: 40
+      }
+    });
+
+    // Configure Markdown parser
+    marked.setOptions({
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            return hljs.highlight(code, { language: lang }).value;
+          } catch (err) {
+            console.warn('Highlight error:', err);
+          }
+        }
+        return hljs.highlightAuto(code).value;
+      },
+      breaks: true,
+      gfm: true
+    });
+
     // Monaco Editor Configuration
     require.config({
         paths: { 
@@ -956,8 +1386,10 @@ document.addEventListener("click", (e) => {
         }
     });
 
-    let editor;
-    let currentFile = null;
+    //let editor;
+    
+    let currentStream = null;
+    let accumulatedText = '';
 
     // Initialize Editor
     window.addEventListener('load', function() {
@@ -1266,8 +1698,185 @@ document.documentElement.style.setProperty('--font-size', `${currentFontSize}px`
             });
         });
     });
-  
     
+    //Ai implementation part 
+ // DOM Elements
+ const aiPanel = document.getElementById('ai-panel');
+ const aiToggle = document.getElementById('ai-toggle');
+ const aiPrompt = document.getElementById('aiPrompt');
+ const aiOutput = document.getElementById('aiOutput');
+ const aiSend = document.getElementById('aiSend');
+ const aiCheck = document.getElementById('aiCheck');
+ const aiClose = document.getElementById('aiClose');
+ 
+ // Event Listeners
+ aiToggle.addEventListener('click', toggleAIPanel);
+ aiClose.addEventListener('click', closeAIPanel);
+ aiSend.addEventListener('click', sendMessage);
+ aiCheck.addEventListener('click', analyzeCode);
+ 
+ aiPrompt.addEventListener('keydown', function(e) {
+     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+         e.preventDefault();
+         sendMessage();
+     }
+ });
+ 
+ // Functions
+ function toggleAIPanel() {
+     aiPanel.classList.toggle('open');
+     if (aiPanel.classList.contains('open')) {
+         aiPrompt.blur();
+     }
+ }
+ 
+ function closeAIPanel() {
+     aiPanel.classList.remove('open');
+     if (currentStream) {
+         currentStream.abort();
+         currentStream = null;
+     }
+ }
+ 
+ function addCopyButtons(container) {
+     const preElements = container.querySelectorAll('pre');
+     preElements.forEach(pre => {
+         // Remove existing copy button if present
+         const existingBtn = pre.querySelector('.copy-btn');
+         if (existingBtn) existingBtn.remove();
+         
+         const code = pre.querySelector('code');
+         if (code) {
+             const copyBtn = document.createElement('button');
+             copyBtn.innerText = 'Copy';
+             copyBtn.classList.add('copy-btn');
+             copyBtn.addEventListener('click', function() {
+                 const textToCopy = code.textContent || code.innerText;
+                 navigator.clipboard.writeText(textToCopy).then(() => {
+                     copyBtn.innerText = 'Copied!';
+                     setTimeout(() => {
+                         copyBtn.innerText = 'Copy';
+                     }, 2000);
+                 }).catch(err => {
+                     console.error('Failed to copy: ', err);
+                     copyBtn.innerText = 'Failed';
+                     setTimeout(() => {
+                         copyBtn.innerText = 'Copy';
+                     }, 2000);
+                 });
+             });
+             pre.appendChild(copyBtn);
+         }
+     });
+ }
+ 
+ async function sendMessage() {
+     const prompt = aiPrompt.value.trim();
+     if (!prompt) {
+         aiOutput.innerHTML = '<div class="error">Please enter a message before sending.</div>';
+         return;
+     }
+     
+     if (aiSend.innerText === "Cancel") {
+         // Cancel current request
+         if (currentStream) {
+             currentStream.abort();
+             currentStream = null;
+         }
+         aiSend.innerText = "Send";
+         aiSend.disabled = false;
+         aiCheck.disabled = false;
+         return;
+     }
+     
+     // Start new request
+     aiSend.innerText = "Cancel";
+     aiSend.disabled = false;
+     aiCheck.disabled = true;
+     accumulatedText = '';
+     
+     // Add user message to output
+     const userMessage = `<div><strong>You:</strong> ${escapeHtml(prompt)}</div>`;
+     aiOutput.innerHTML = userMessage + '<div class="thinking">AI is thinking...</div>';
+     aiOutput.scrollTop = aiOutput.scrollHeight;
+     
+     // Clear input
+     aiPrompt.value = '';
+     
+     try {
+         // Get current code for context
+         const currentCode = editor.getValue();
+         
+         // Create enhanced prompt with code context
+         const enhancedPrompt = `As a Kotlin programming expert, please help with the following request.
+
+User Request: ${prompt}
+
+Current Code:
+\`\`\`kotlin
+${currentCode}
+\`\`\`
+
+Please provide a helpful, detailed response. If suggesting code changes, use Markdown code blocks.`;
+         
+         const result = await model.generateContentStream(enhancedPrompt);
+         currentStream = result;
+         
+         // Clear thinking message
+         aiOutput.innerHTML = userMessage;
+         
+         for await (const chunk of result.stream) {
+             const chunkText = chunk.text();
+             if (chunkText) {
+                 accumulatedText += chunkText;
+                 const renderedHTML = marked.parse(accumulatedText);
+                 aiOutput.innerHTML = userMessage + renderedHTML;
+                 addCopyButtons(aiOutput);
+                 aiOutput.scrollTop = aiOutput.scrollHeight;
+             }
+         }
+         
+         // Final rendering
+         const finalHTML = marked.parse(accumulatedText);
+         aiOutput.innerHTML = userMessage + finalHTML + '<div class="success">Response completed.</div>';
+         addCopyButtons(aiOutput);
+         
+     } catch (error) {
+         console.error('AI Error:', error);
+         if (error.name !== 'AbortError') {
+             aiOutput.innerHTML = userMessage + `<div class="error">Error: ${error.message}</div>`;
+         } else {
+             aiOutput.innerHTML = userMessage + '<div class="error">Request cancelled.</div>';
+         }
+     } finally {
+         aiSend.innerText = "Send";
+         aiSend.disabled = false;
+         aiCheck.disabled = false;
+         currentStream = null;
+     }
+ }
+ 
+ function analyzeCode() {
+     const code = editor.getValue();
+     aiPrompt.value = "Analyze this Kotlin code for errors, improvements, and best practices.";
+     sendMessage();
+ }
+ 
+ // Utility function to escape HTML
+ function escapeHtml(text) {
+     const div = document.createElement('div');
+     div.textContent = text;
+     return div.innerHTML;
+ }
+ 
+ // Initialize highlight.js
+ hljs.highlightAll();
+  
+    </script>
+
+    <script>
+        let editor;
+let currentFile = null;
 
     // Modal Management Functions
     function closeAllModals() {
@@ -1713,8 +2322,8 @@ window.addEventListener('beforeunload', function(e) {
 
     // Initialize status
     updateStatus('Ready - Open file manager to start coding');
-</script>
-<script>
+    </script>
+    <script>
         const terminalPanel = document.getElementById('terminal-panel');
         const terminalHeader = document.getElementById('terminal-header');
         const MAX_TOP_MARGIN = 57.6;
@@ -1774,8 +2383,8 @@ window.addEventListener('beforeunload', function(e) {
             isDragging = false;
         });
     </script>
-    
+
 
 </body>
-</html>
 
+</html>
