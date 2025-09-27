@@ -210,7 +210,7 @@ def build_tree(path):
                 elif entry.is_file():
 
                 #elif entry.is_file() and entry.name.endswith(('.kt', '.java', '.xml', '.gradle', '.txt', '.properties', '.kts', '.toml', )):
-                    tree[entry.name] = None  # ফাইলের জন্য None বা ফাইল মেটাডেটা রাখতে পারো
+                    tree[entry.name] = None  
     except PermissionError:
         pass
     return tree
